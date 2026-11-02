@@ -35,3 +35,17 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### macOS ###
+.DS_Store
+
+### Claude Code ###
+.claude/
+
+### Secrets / Logs ###
+.env
+*.env
+application-local.yaml
+application-secret.yaml
+*.log
+logs/
