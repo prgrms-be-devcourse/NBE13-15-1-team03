@@ -6,6 +6,7 @@ import com.kdt.cafe.service.CategoryService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.*;
 import java.util.List;
@@ -42,6 +43,18 @@ public class CategoryController {
     @PutMapping("/{categoryId}")
     public Category updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         return categoryService.update(categoryId, categoryRequestDTO);
+    }
+
+    //카테고리 name 양식 검사
+    private String nameCheck(String name){
+        if(name == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is null");
+        }
+        String onlyname = name.strip();
+        if (onlyname.length()>30||onlyname.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Name is too long or empty");
+        }
+        return onlyname;
     }
 
 //    //삭제
