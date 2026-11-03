@@ -1,4 +1,7 @@
 package com.kdt.cafe.dto;
 
-public class CategoryResponseDTO {
+public record CategoryResponseDTO() {
+//    private String name;
+//
+//    public String getName() {}
 }
