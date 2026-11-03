@@ -1,6 +1,7 @@
 package com.kdt.cafe.controller;
 
 import com.kdt.cafe.dto.CategoryRequestDTO;
+import com.kdt.cafe.dto.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.service.CategoryService;
 import org.springframework.data.domain.Sort;
@@ -22,40 +23,29 @@ public class CategoryController {
 
     //전체 조회
     @GetMapping
-    public List<Category> getCategories() {
+    public List<CategoryResponseDTO> getCategories() {
         return categoryService.findAll();
     }
 
     //단건
     @GetMapping("/{categoryId}")
-    public Category getCategory(@PathVariable("categoryId") int categoryId) {
+    public CategoryResponseDTO getCategory(@PathVariable("categoryId") int categoryId) {
         return categoryService.findById(categoryId);
     }
 
     //등록
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Category saveCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
+    public CategoryResponseDTO saveCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
         return categoryService.save(categoryRequestDTO);
     }
 
     //수정
     @PutMapping("/{categoryId}")
-    public Category updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
+    public CategoryResponseDTO updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         return categoryService.update(categoryId, categoryRequestDTO);
     }
 
-    //카테고리 name 양식 검사
-    private String nameCheck(String name){
-        if(name == null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is null");
-        }
-        String onlyname = name.strip();
-        if (onlyname.length()>30||onlyname.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Name is too long or empty");
-        }
-        return onlyname;
-    }
 
 //    //삭제
 //    @DeleteMapping("/{categoryId}")
