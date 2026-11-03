@@ -1,6 +1,7 @@
 package com.kdt.cafe.dto;
 
 import com.kdt.cafe.entity.Order;
+import com.kdt.cafe.entity.OrderStatus;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -15,7 +16,7 @@ public record OrderResponseDTO(Long id,
                                LocalDate shippingDate,
                                int totalAmount,
                                List<OrderItemResponseDTO> items,
-                               String status,
+                               OrderStatus status,
                                OffsetDateTime cancelledAt,
                                String memo) {
 
@@ -27,11 +28,6 @@ public record OrderResponseDTO(Long id,
                 .map(OrderItemResponseDTO::from) //스트림으로 리스트의 각 항목을 꺼내 OrderItemResponseDTO::from에 넣고 결과를 새 리스트로 모은 것.
                 .toList();
 
-        // 각 항목 금액(lineAmount)의 합계
-        int totalAmount = items.stream()
-                .mapToInt(OrderItemResponseDTO::lineAmount)
-                .sum();
-
         return new OrderResponseDTO(
                 order.getId(),
                 order.getEmail(),
@@ -39,7 +35,7 @@ public record OrderResponseDTO(Long id,
                 order.getPostcode(),
                 order.getCreatedAt().atZone(SEOUL).toOffsetDateTime(), // +09:00 붙이기
                 order.getShippingDate(),
-                totalAmount,
+                order.getTotalAmount(),
                 items,
                 order.getStatus(),
                 null,
