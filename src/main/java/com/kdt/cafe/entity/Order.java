@@ -27,8 +27,9 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private String status;
+    private OrderStatus status;
 
     @Column(nullable = false, length = 200)
     private String address;
@@ -42,6 +43,9 @@ public class Order {
     @Column(nullable = false)
     private LocalDate shippingDate;
 
+    @Column()
+    private LocalDateTime cancelledAt;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -49,14 +53,15 @@ public class Order {
 
     }
 
-    public Order(String email, String address, String postcode, String memo, LocalDateTime createdAt, String status, LocalDate shippingDate) {
+    public Order(String email, String address, String postcode, LocalDateTime createdAt, LocalDate shippingDate) {
         this.email = email;
         this.address = address;
         this.postcode = postcode;
-        this.memo = memo;
+        this.memo = "";
         this.createdAt = createdAt;
-        this.status = status;
+        this.status = OrderStatus.PLACED;
         this.shippingDate = shippingDate;
+        this.cancelledAt = null;
     }
 
     public void addOrderItems(OrderItem orderItem){
@@ -67,8 +72,18 @@ public class Order {
         orderItem.setOrder(this);
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public int getTotalAmount(){
+        return this.orderItems.stream()
+                .mapToInt(OrderItem::getLineAmount)
+                .sum();
+    }
+
+    public void cancel(){
+        if (this.status == OrderStatus.PLACED) {
+            throw new IllegalArgumentException("이미 취소된 주문입니다");
+        }
+        this.status = OrderStatus.CANCELLED;
+        this.cancelledAt = LocalDateTime.now();
     }
 
 }

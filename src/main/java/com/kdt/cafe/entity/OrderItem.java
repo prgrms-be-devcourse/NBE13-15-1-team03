@@ -30,7 +30,6 @@ public class OrderItem {
     private Menu menu;
 
     protected OrderItem() {
-
     }
 
     public OrderItem(Menu menu, int quantity, String menuName, int price) {
@@ -42,5 +41,9 @@ public class OrderItem {
 
     void setOrder(Order order) { //같은 패키지 내에서만 호출가능.
         this.order = order;
+    }
+
+    public int getLineAmount(){
+        return this.quantity * this.unitPrice;
     }
 }

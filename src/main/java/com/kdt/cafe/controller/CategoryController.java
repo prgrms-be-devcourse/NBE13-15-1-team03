@@ -2,14 +2,10 @@ package com.kdt.cafe.controller;
 
 import com.kdt.cafe.dto.CategoryRequestDTO;
 import com.kdt.cafe.dto.CategoryResponseDTO;
-import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.service.CategoryService;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.awt.*;
 import java.util.List;
 
 @RestController
