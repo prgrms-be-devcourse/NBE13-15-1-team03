@@ -83,11 +83,12 @@ public class CategoryService {
         }
     }
 
-//    //삭제
-//    public Category delete(Category category){
-//        categoryRepository.delete(category);
-//        return category;
-//    }
+    //삭제
+    @Transactional
+    public void delete(int id){
+        Category category = getCategoryById(id);
+        categoryRepository.delete(category);
+    }
 
     //카테고리 별 메뉴 조회
 //    public

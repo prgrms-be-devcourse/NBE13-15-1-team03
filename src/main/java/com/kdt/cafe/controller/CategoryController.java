@@ -23,12 +23,14 @@ public class CategoryController {
 
     //전체 조회
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<CategoryResponseDTO> getCategories() {
         return categoryService.findAll();
     }
 
     //단건
     @GetMapping("/{categoryId}")
+    @ResponseStatus(HttpStatus.OK)
     public CategoryResponseDTO getCategory(@PathVariable("categoryId") int categoryId) {
         return categoryService.findById(categoryId);
     }
@@ -42,17 +44,19 @@ public class CategoryController {
 
     //수정
     @PutMapping("/{categoryId}")
+    @ResponseStatus(HttpStatus.OK)
     public CategoryResponseDTO updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         return categoryService.update(categoryId, categoryRequestDTO);
     }
 
 
-//    //삭제
-//    @DeleteMapping("/{categoryId}")
-//    public void deleteCategory(@PathVariable("categoryId") int categoryId) {
-//        return categoryService.delete();
-//    }
-//
+    //삭제
+    @DeleteMapping("/{categoryId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable("categoryId") int categoryId) {
+        categoryService.delete(categoryId);
+    }
+
 //    @GetMapping("/{categoryId}/menus")
 //    public List<Menu> getMenusByCategory(@PathVariable("categoryId") int categoryId) {
 //        return
