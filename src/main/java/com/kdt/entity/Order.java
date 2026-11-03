@@ -3,6 +3,7 @@ package com.kdt.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name="orders")
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
     @Id
@@ -41,4 +43,9 @@ public class Order {
     public Order() {
 
     }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }
