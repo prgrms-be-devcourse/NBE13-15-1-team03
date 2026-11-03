@@ -1,4 +1,4 @@
-package com.kdt.entity;
+package com.kdt.cafe.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,6 +7,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -34,14 +36,35 @@ public class Order {
     @Column(nullable = false, length = 5)
     private String postcode;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String memo;
 
     @Column(nullable = false)
     private LocalDate shippingDate;
 
-    public Order() {
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
+    protected Order() {
+
+    }
+
+    public Order(String email, String address, String postcode, String memo, LocalDateTime createdAt, String status, LocalDate shippingDate) {
+        this.email = email;
+        this.address = address;
+        this.postcode = postcode;
+        this.memo = memo;
+        this.createdAt = createdAt;
+        this.status = status;
+        this.shippingDate = shippingDate;
+    }
+
+    public void addOrderItems(OrderItem orderItem){
+        if (orderItem == null) {
+            throw new IllegalArgumentException("주문 항목은 null일 수 없습니다.");
+        }
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
     }
 
     public void setStatus(String status) {
