@@ -3,6 +3,7 @@ package com.kdt.cafe.controller;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.service.CategoryService;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
@@ -23,18 +24,19 @@ public class CategoryController {
         return categoryService.findAll();
     }
 
-//    //단건
-//    @GetMapping("/{categoryId}")
-//    public Category getCategory(@PathVariable("categoryId") int categoryId) {
-//        return categoryService.findById(categoryId);
-//    }
-//
+    //단건
+    @GetMapping("/{categoryId}")
+    public Category getCategory(@PathVariable("categoryId") int categoryId) {
+        return categoryService.findById(categoryId);
+    }
+
 //    //등록
 //    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
 //    public Category saveCategory(@RequestBody Category category) {
-//        return categoryService.save(category);
+//        return categoryService.save();
 //    }
-//
+
 //    //수정
 //    @PutMapping("/{categoryId}")
 //    public Category updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody Category category) {
