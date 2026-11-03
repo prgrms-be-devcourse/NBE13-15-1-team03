@@ -38,12 +38,12 @@ public class CategoryController {
         return categoryService.save(categoryRequestDTO);
     }
 
-//    //수정
-//    @PutMapping("/{categoryId}")
-//    public Category updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody Category category) {
-//        return categoryService.update(category);
-//    }
-//
+    //수정
+    @PutMapping("/{categoryId}")
+    public Category updateCategory(@PathVariable("categoryId") int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
+        return categoryService.update(categoryId, categoryRequestDTO);
+    }
+
 //    //삭제
 //    @DeleteMapping("/{categoryId}")
 //    public void deleteCategory(@PathVariable("categoryId") int categoryId) {

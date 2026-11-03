@@ -40,17 +40,19 @@ public class CategoryService {
 
     //등록
     @Transactional
-    public Category save(CategoryRequestDTO  categoryRequestDTO) {
+    public Category save(CategoryRequestDTO categoryRequestDTO) {
         Category category = new Category(categoryRequestDTO.name());
         return categoryRepository.save(category);
     }
 
-//    //수정
-//    public Category update(Category category){
-//        categoryRepository.save(category);
-//        return category;
-//    }
-//
+    //수정
+    @Transactional
+    public Category update(int id, CategoryRequestDTO categoryRequestDTO) {
+        Category category = findById(id);
+        category.setName(categoryRequestDTO.name());
+        return category;
+    }
+
 //    //삭제
 //    public Category delete(Category category){
 //        categoryRepository.delete(category);
