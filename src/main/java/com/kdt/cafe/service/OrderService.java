@@ -1,17 +1,14 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.OrderCreateRequestDTO;
-import com.kdt.cafe.dto.OrderItemRequestDTO;
-import com.kdt.cafe.dto.OrderResponseDTO;
+import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.exception.NotfoundException;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +17,6 @@ import java.time.ZoneId;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -28,7 +24,6 @@ public class OrderService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
     private static final LocalTime SHIPPING_CUTOFF = LocalTime.of(14,0); // 14:00:00 상수로 고정
-    private final ResponseEntityExceptionHandler responseEntityExceptionHandler;
 
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
@@ -76,5 +71,17 @@ public class OrderService {
         return orderDate.plusDays(1); // 14:00 정각부터 -> 다음 날
     }
 
+    @Autowired
+    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository) {
+        this.orderRepository = orderRepository;
+        this.menuRepository = menuRepository;
+    }
 
+    @Transactional
+    public List<OrderSummary> getOrdersByEmail(OrderListRequestDTO dto){
+        List<Order> orders = orderRepository.findByEmail(dto.email());
+        return orders.stream()
+                .map(OrderSummary::from)
+                .toList();
+    }
 }
