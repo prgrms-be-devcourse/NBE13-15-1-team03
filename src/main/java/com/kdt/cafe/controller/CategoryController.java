@@ -1,5 +1,6 @@
 package com.kdt.cafe.controller;
 
+import com.kdt.cafe.dto.CategoryRequestDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.service.CategoryService;
 import org.springframework.data.domain.Sort;
@@ -30,12 +31,12 @@ public class CategoryController {
         return categoryService.findById(categoryId);
     }
 
-//    //등록
-//    @PostMapping
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Category saveCategory(@RequestBody Category category) {
-//        return categoryService.save();
-//    }
+    //등록
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Category saveCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
+        return categoryService.save(categoryRequestDTO);
+    }
 
 //    //수정
 //    @PutMapping("/{categoryId}")
