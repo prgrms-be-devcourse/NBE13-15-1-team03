@@ -4,7 +4,8 @@ import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.entity.OrderItem;
-import com.kdt.cafe.exception.NotfoundException;
+import com.kdt.cafe.exception.BusinessLogicException;
+import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +42,13 @@ public class OrderService {
 
         // 3. 없는 메뉴가 있는지 검사
         if (menus.size() != menuIds.stream().distinct().count()){
-            throw new NotfoundException("menu missing");
+            throw new BusinessLogicException(ErrorCode.MENU_NOT_FOUND);
         }
 
         // 4. 판매 중지 메뉴가 있는지 검사
         for (Menu menu : menus){
             if (!menu.isAvailable()){
-                throw new IllegalStateException("판매 중지된 메뉴가 포함되어 있습니다."); // TODO: 409 MENU_UNAVAILABLE 예외로 교체
+                throw new BusinessLogicException(ErrorCode.MENU_UNAVAILABLE);
             }
         }
 
