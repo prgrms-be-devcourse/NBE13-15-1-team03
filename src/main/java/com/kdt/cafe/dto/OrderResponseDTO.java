@@ -38,7 +38,7 @@ public record OrderResponseDTO(Long id,
                 order.getTotalAmount(),
                 items,
                 order.getStatus(),
-                null,
+                order.getCancelledAt() == null ? null : order.getCancelledAt().atZone(SEOUL).toOffsetDateTime(),
                 order.getMemo() == null ? "" : order.getMemo()
         );
     }

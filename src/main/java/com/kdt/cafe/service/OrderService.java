@@ -9,6 +9,7 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,6 @@ public class OrderService {
     private final MenuRepository menuRepository;
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final LocalTime SHIPPING_CUTOFF = LocalTime.of(14,0); // 14:00:00 상수로 고정
 
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
@@ -78,7 +78,7 @@ public class OrderService {
         LocalDate orderDate = orderAt.toLocalDate(); //날짜
         LocalTime orderTime = orderAt.toLocalTime(); //시간
 
-        if (orderTime.isBefore(SHIPPING_CUTOFF)){ // 14:00:00 이전일 경우에 true 즉, 13:59:59는 true
+        if (orderTime.isBefore(Order.SHIPPING_CUTOFF)){ // 14:00:00 이전일 경우에 true 즉, 13:59:59는 true
             return orderDate; // 14:00 전 -> 당일
         }
         return orderDate.plusDays(1); // 14:00 정각부터 -> 다음 날
@@ -97,4 +97,19 @@ public class OrderService {
                 .map(OrderSummary::from)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDTO getOrder(Long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+        return OrderResponseDTO.from(order);
+    }
+
+    @Transactional
+    public OrderResponseDTO cancelOrder(Long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+        LocalDateTime now = LocalDateTime.now(SEOUL);
+        order.cancel(now);
+        return OrderResponseDTO.from(order);
+    }
+
 }
