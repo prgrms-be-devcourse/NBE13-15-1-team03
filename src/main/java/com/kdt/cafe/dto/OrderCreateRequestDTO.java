@@ -6,7 +6,6 @@ public record OrderCreateRequestDTO(
         String email,
         String address,
         String postcode,
-        String memo,
         List<OrderItemRequestDTO> items
 ) {
 }
