@@ -3,15 +3,13 @@ package com.kdt.cafe.service;
 import com.kdt.cafe.dto.CategoryRequestDTO;
 import com.kdt.cafe.dto.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
-import com.kdt.cafe.exception.NotfoundException;
+import com.kdt.cafe.exception.ErrorCode;
+import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.repository.CategoryRepository;
-import org.apache.coyote.BadRequestException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -33,17 +31,11 @@ public class CategoryService {
 
     //내부 단건 조회 - 엔티티 반환
     private Category getCategoryById(int id){
-        validateId(id);
-        return categoryRepository.findById(id).orElseThrow(() -> new NotfoundException("missing"));
-    }
-
-    //ID 검사
-    private void validateId(int id){
         if (id < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"invalid id");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"id is negative");
         }
+        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
     }
-
 
     //단건 조회
     @Transactional(readOnly = true)
@@ -89,15 +81,11 @@ public class CategoryService {
         }
     }
 
-    //삭제
-    @Transactional
-    public void delete(int id){
-        validateId(id);
-        if (!categoryRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"id not found");
-        }
-        categoryRepository.deleteById(id);
-    }
+//    //삭제
+//    public Category delete(Category category){
+//        categoryRepository.delete(category);
+//        return category;
+//    }
 
     //카테고리 별 메뉴 조회
 //    public
