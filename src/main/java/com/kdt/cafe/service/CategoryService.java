@@ -37,7 +37,7 @@ public class CategoryService {
 
     //Id 음수 여부 확인
     private void validateId(int id){
-        if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //음수 Id 없음
+        if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR,"categoryId","잘못된 아이디입니다");
         }
     }
 
