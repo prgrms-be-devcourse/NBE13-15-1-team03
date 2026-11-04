@@ -46,6 +46,10 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateMemo(orderId,request));
     }
 
+    @PostMapping("/{orderId}/reorder")
+    public ResponseEntity<OrderResponseDTO> reOrder(@PathVariable("orderId") Long orderId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.reOrder(orderId));
+    }
 
 
 }
