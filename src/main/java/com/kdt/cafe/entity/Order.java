@@ -97,4 +97,8 @@ public class Order {
         this.cancelledAt = now;
     }
 
+    public void updateMemo(String memo){
+        this.memo = memo;
+    }
+
 }

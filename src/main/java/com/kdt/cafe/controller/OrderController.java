@@ -1,11 +1,9 @@
 package com.kdt.cafe.controller;
 
-import com.kdt.cafe.dto.OrderCreateRequestDTO;
-import com.kdt.cafe.dto.OrderListRequestDTO;
-import com.kdt.cafe.dto.OrderResponseDTO;
-import com.kdt.cafe.dto.OrderSummary;
+import com.kdt.cafe.dto.*;
 import com.kdt.cafe.service.OrderService;
 import jakarta.persistence.GeneratedValue;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderCreateRequestDTO request){
+    public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderCreateRequestDTO request){
         OrderResponseDTO response = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -42,5 +40,16 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> cancelOrder(@PathVariable("orderId") Long orderId){
         return ResponseEntity.ok(orderService.cancelOrder(orderId));
     }
+
+    @PutMapping("/{orderId}/memo")
+    public ResponseEntity<OrderResponseDTO> updateMemo(@PathVariable("orderId") Long orderId,@Valid @RequestBody OrderMemoUpdateRequestDTO request){
+        return ResponseEntity.ok(orderService.updateMemo(orderId,request));
+    }
+
+    @PostMapping("/{orderId}/reorder")
+    public ResponseEntity<OrderResponseDTO> reOrder(@PathVariable("orderId") Long orderId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.reOrder(orderId));
+    }
+
 
 }

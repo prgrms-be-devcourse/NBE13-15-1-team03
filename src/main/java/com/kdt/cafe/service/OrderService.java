@@ -31,9 +31,14 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
+        return placeOrder(request.email(), request.address(), request.postcode(), request.items());
+    }
+
+    // 재주문에서 재사용하기 위해 작성한 메서드
+    private OrderResponseDTO placeOrder(String email, String address, String postcode, List<OrderItemRequestDTO> items){
 
         // 1. 요청에서 메뉴 id 목록 뽑기
-        List<Integer> menuIds = request.items().stream()
+        List<Integer> menuIds = items.stream()
                 .map(OrderItemRequestDTO::menuId)
                 .toList();
 
@@ -57,12 +62,12 @@ public class OrderService {
         LocalDate shippingDate = calculateShippingDate(nowTime);
 
         // 6. Order 만들고, 항목마다 OrderItem 만들어서 추가
-        Order order = new Order(request.email(), request.address(), request.postcode(), nowTime, shippingDate);
+        Order order = new Order(email, address, postcode, nowTime, shippingDate);
 
         Map<Integer, Menu> menuById = menus.stream()
                 .collect(Collectors.toMap(Menu::getId,menu -> menu));
 
-        for (OrderItemRequestDTO itemRequest : request.items()){
+        for (OrderItemRequestDTO itemRequest : items){
             Menu menu = menuById.get(itemRequest.menuId());
             OrderItem orderItem = new OrderItem(menu, itemRequest.quantity(), menu.getName(), menu.getPrice());
             order.addOrderItems(orderItem);
@@ -71,6 +76,19 @@ public class OrderService {
         // 7. 저장하고, 응답 DTO로 바꿔서 반환
         Order savedOrder = orderRepository.save(order);
         return OrderResponseDTO.from(savedOrder);
+    }
+
+    @Transactional
+    public OrderResponseDTO reOrder(Long orderId){
+        //기존 주문
+        Order original = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+
+        // OrderItem 하나(item)가 들어오면 그 메뉴의 id와 수량으로 새 요청 DTO를 만들어 내보내는 것.
+        List<OrderItemRequestDTO> items = original.getOrderItems().stream()
+                .map(item -> new OrderItemRequestDTO(item.getMenu().getId(), item.getQuantity()))
+                .toList();
+
+        return placeOrder(original.getEmail(), original.getAddress(), original.getPostcode(), items);
     }
 
     //배송일 계산을 위한 메서드
@@ -112,4 +130,10 @@ public class OrderService {
         return OrderResponseDTO.from(order);
     }
 
+    @Transactional
+    public OrderResponseDTO updateMemo(Long orderId, OrderMemoUpdateRequestDTO request){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+        order.updateMemo(request.memo());
+        return OrderResponseDTO.from(order);
+    }
 }
