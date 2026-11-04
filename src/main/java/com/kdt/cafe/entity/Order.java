@@ -4,19 +4,17 @@ import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Entity
 @Table(name="orders")
-@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
     @Id
@@ -26,7 +24,6 @@ public class Order {
     @Column(nullable = false, length = 100)
     private String email;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -52,6 +49,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    public static final ZoneId ZONE = ZoneId.of("Asia/Seoul"); // 접수 시각·배송일·취소 마감 모두 서울 기준
     public static final LocalTime SHIPPING_CUTOFF = LocalTime.of(14,0); // 14:00:00 상수로 고정
 
     protected Order() {
@@ -80,6 +78,12 @@ public class Order {
     public int getTotalAmount(){
         return this.orderItems.stream()
                 .mapToInt(OrderItem::getLineAmount)
+                .sum();
+    }
+
+    public int getTotalQuantity(){
+        return this.orderItems.stream()
+                .mapToInt(OrderItem::getQuantity)
                 .sum();
     }
 

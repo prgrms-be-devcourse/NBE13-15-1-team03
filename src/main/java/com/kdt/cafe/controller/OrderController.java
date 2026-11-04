@@ -5,6 +5,7 @@ import com.kdt.cafe.dto.OrderListRequestDTO;
 import com.kdt.cafe.dto.OrderResponseDTO;
 import com.kdt.cafe.dto.OrderSummary;
 import com.kdt.cafe.service.OrderService;
+import jakarta.validation.Valid;
 import jakarta.persistence.GeneratedValue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class OrderController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<OrderSummary>> searchOrderList(OrderListRequestDTO dto){
+    public ResponseEntity<List<OrderSummary>> searchOrderList(@Valid OrderListRequestDTO dto){
         return ResponseEntity.ok(orderService.getOrdersByEmail(dto));
     }
 

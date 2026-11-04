@@ -1,20 +1,13 @@
 package com.kdt.cafe.dto;
 
-import com.kdt.cafe.utils.validate.EmailValidator;
+import com.kdt.cafe.utils.validate.ValidEmail;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-public record OrderListRequestDTO(String email) {
-
-    public OrderListRequestDTO {
-        if (email == null) {
-            throw new IllegalArgumentException("이메일이 null 입니다");
-        }
-
-        if (email.length() > 100) {
-            throw new IllegalArgumentException("길이 제한 초과");
-        }
-
-        if (!EmailValidator.isValid(email)) {
-            throw new IllegalArgumentException("형식에 맞지 않는 이메일:" + email);
-        }
-    }
+public record OrderListRequestDTO(
+        @NotNull(message = "이메일이 비어있습니다")
+        @Size(min = 1, max = 100, message = "길이 제한을 벗어났습니다")
+        @ValidEmail(message = "이메일이 형식에 맞지 않습니다")
+        String email
+) {
 }
