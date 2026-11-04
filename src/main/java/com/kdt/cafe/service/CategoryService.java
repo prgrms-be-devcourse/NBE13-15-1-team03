@@ -3,7 +3,8 @@ package com.kdt.cafe.service;
 import com.kdt.cafe.dto.CategoryRequestDTO;
 import com.kdt.cafe.dto.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
-import com.kdt.cafe.exception.NotfoundException;
+import com.kdt.cafe.exception.ErrorCode;
+import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.repository.CategoryRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class CategoryService {
         if (id < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"id is negative");
         }
-        return categoryRepository.findById(id).orElseThrow(() -> new NotfoundException("missing"));
+        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
     //단건 조회

@@ -35,7 +35,7 @@ public class Menu {
 
     }
 
-    public Menu(Category category, String description, String name, int price) {
+    public Menu(Category category, String name, int price, String description) {
         this.category = category;
         this.description = description;
         this.name = name;
