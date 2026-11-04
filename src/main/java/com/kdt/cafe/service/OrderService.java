@@ -112,4 +112,10 @@ public class OrderService {
         return OrderResponseDTO.from(order);
     }
 
+    @Transactional
+    public OrderResponseDTO updateMemo(Long orderId, OrderMemoUpdateRequestDTO request){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+        order.updateMemo(request.memo());
+        return OrderResponseDTO.from(order);
+    }
 }
