@@ -22,4 +22,22 @@ public record OrderCreateRequestDTO(
         @Size(min = 1, max = 10, message = "주문 항목은 1개 이상 10개 이하여야 합니다.")
         List<@Valid OrderItemRequestDTO> items
 ) {
+        // 주소, 우편번호의 앞뒤 공백 제거
+        public OrderCreateRequestDTO{
+                address = (address == null) ? null : address.strip();
+                postcode = (postcode == null) ? null : postcode.strip();
+        }
+
+        // 같은 메뉴가 두 번 들어올 때 실패
+        @AssertTrue(message = "같은 메뉴를 중복해서 주문할 수 없습니다.")
+        public boolean isMenuIdsUnique() {
+                if (items == null) {
+                        return true;
+                }
+                List<Integer> menuIds = items.stream()
+                        .map(OrderItemRequestDTO::menuId)
+                        .toList();
+                return menuIds.size() == menuIds.stream().distinct().count(); //개수가 그대로면 중복이 없다는 것.
+        }
 }
+
