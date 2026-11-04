@@ -84,9 +84,9 @@ public class Order {
     }
 
     public void cancel(LocalDateTime now){
-        // 접수 상태가 아니면 취소 불가
-        if (this.status != OrderStatus.PLACED) {
-            throw new BusinessLogicException(ErrorCode.ORDER_NOT_CANCELLABLE);
+        // 취소면 리턴
+        if (this.status == OrderStatus.CANCELLED) {
+            return;
         }
         // 배송일 14:00 이후면 취소 불가
         LocalDateTime cancelDeadline =  shippingDate.atTime(SHIPPING_CUTOFF); //atTime(14:00) shippingDate에 14:00라는 시각을 더해줌.
