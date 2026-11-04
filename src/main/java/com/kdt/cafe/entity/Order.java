@@ -1,5 +1,7 @@
 package com.kdt.cafe.entity;
 
+import com.kdt.cafe.exception.BusinessLogicException;
+import com.kdt.cafe.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -7,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +52,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    public static final LocalTime SHIPPING_CUTOFF = LocalTime.of(14,0); // 14:00:00 상수로 고정
+
     protected Order() {
 
     }
@@ -78,12 +83,18 @@ public class Order {
                 .sum();
     }
 
-    public void cancel(){
-        if (this.status == OrderStatus.PLACED) {
-            throw new IllegalArgumentException("이미 취소된 주문입니다");
+    public void cancel(LocalDateTime now){
+        // 접수 상태가 아니면 취소 불가
+        if (this.status != OrderStatus.PLACED) {
+            throw new BusinessLogicException(ErrorCode.ORDER_NOT_CANCELLABLE);
+        }
+        // 배송일 14:00 이후면 취소 불가
+        LocalDateTime cancelDeadline =  shippingDate.atTime(SHIPPING_CUTOFF); //atTime(14:00) shippingDate에 14:00라는 시각을 더해줌.
+        if (!now.isBefore(cancelDeadline)){ //지금이 마감 이전이 아니라면
+            throw new BusinessLogicException(ErrorCode.ORDER_NOT_CANCELLABLE);
         }
         this.status = OrderStatus.CANCELLED;
-        this.cancelledAt = LocalDateTime.now();
+        this.cancelledAt = now;
     }
 
 }

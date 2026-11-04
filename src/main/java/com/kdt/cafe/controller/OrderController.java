@@ -38,4 +38,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
 
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<OrderResponseDTO> cancelOrder(@PathVariable("orderId") Long orderId){
+        return ResponseEntity.ok(orderService.cancelOrder(orderId));
+    }
+
 }
