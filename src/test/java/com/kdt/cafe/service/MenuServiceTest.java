@@ -4,7 +4,7 @@ import com.kdt.cafe.dto.MenuCreateRequestDTO;
 import com.kdt.cafe.dto.MenuResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
-import com.kdt.cafe.exception.NotfoundException;
+import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ class MenuServiceTest {
     void create_rejects_missing_category_without_saving() {
         given(this.categoryRepository.findById(99)).willReturn(Optional.empty());
 
-        NotfoundException error = assertThrows(NotfoundException.class,
+        BusinessLogicException error = assertThrows(BusinessLogicException.class,
                 () -> this.menuService.create(new MenuCreateRequestDTO(99, "House Blend", 6000, "블렌드")));
 
         assertEquals("카테고리를 찾을 수 없습니다.", error.getMessage());
