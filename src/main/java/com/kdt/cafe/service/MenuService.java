@@ -68,7 +68,7 @@ public class MenuService {
         return toResponses(this.menuRepository.findByAvailableTrueOrderByIdAsc());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MenuResponseDTO> findByCategory(Integer categoryId) {
         if(!this.categoryRepository.existsById(categoryId)){
             throw new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -82,7 +82,7 @@ public class MenuService {
         Menu menu = this.findMenu(menuId);
         Category category = this.categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
-        menu.update(category,request.name(), request.price(), request.description());
+        menu.update(category,request.name() , request.price(), request.description());
         return MenuResponseDTO.from(menu);
 
     }
@@ -97,7 +97,7 @@ public class MenuService {
     @Transactional (readOnly = true)
     public List<MenuResponseDTO> search(String keyword) {
         if (keyword == null || keyword.strip().isEmpty() || keyword.strip().length() > 100){
-            throw new IllegalArgumentException("검색어를 확인해 주세요.");//임시 예외 팀 400예외가 정해지면 수정하겠습니다
+            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR);
         }
         return toResponses(this.menuRepository.findByNameContainingOrderByIdAsc(keyword.strip()));
     }
@@ -105,7 +105,7 @@ public class MenuService {
     @Transactional
     public void delete(Integer menuId) {
         Menu menu = this.findMenu(menuId);
-//     삭제 OrderItemRepository 가 만들어지면 구현할 예정
+//        if(orderItemRepository)
     this.menuRepository.delete(menu);
    }
 

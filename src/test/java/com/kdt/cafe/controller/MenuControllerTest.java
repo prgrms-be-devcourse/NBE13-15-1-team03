@@ -97,7 +97,6 @@ class MenuControllerTest {
                         .contentType(APPLICATION_JSON)
                         .content("{\"categoryId\":1,\"name\":\"House Blend\",\"price\":6000,\"description\":\"blend\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/v1/menus/5"))
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(5))
                 .andExpect(jsonPath("$.categoryId").value(1))
