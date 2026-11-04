@@ -10,7 +10,8 @@ import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.kdt.cafe.exception.NotfoundException;
+import com.kdt.cafe.exception.ErrorCode;
+import com.kdt.cafe.exception.BusinessLogicException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class MenuService {
     @Transactional
     public MenuResponseDTO create(MenuCreateRequestDTO request) {
         Category category = this.categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new NotfoundException("카테고리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Menu menu = new Menu(category, request.name(), request.price(), request.description());
 
@@ -45,7 +46,7 @@ public class MenuService {
 
     private Menu findMenu(Integer menuId) {
         return this.menuRepository.findById(menuId)
-                .orElseThrow(() -> new NotfoundException("메뉴를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessLogicException(ErrorCode.MENU_NOT_FOUND));
     }
 
     private List<MenuResponseDTO> toResponses(List<Menu> menus){
@@ -70,7 +71,7 @@ public class MenuService {
     @Transactional
     public List<MenuResponseDTO> findByCategory(Integer categoryId) {
         if(!this.categoryRepository.existsById(categoryId)){
-            throw new NotfoundException("카테고리를 찾을 수 없습니다.");
+            throw new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
         return toResponses(this.menuRepository.findByCategory_IdOrderByIdAsc(categoryId));
@@ -80,7 +81,7 @@ public class MenuService {
     public MenuResponseDTO update(Integer menuId, MenuUpdateRequestDTO request) {
         Menu menu = this.findMenu(menuId);
         Category category = this.categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new NotfoundException("카테고리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
         menu.update(category,request.name(), request.price(), request.description());
         return MenuResponseDTO.from(menu);
 
