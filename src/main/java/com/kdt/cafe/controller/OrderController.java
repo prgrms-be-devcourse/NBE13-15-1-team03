@@ -5,6 +5,7 @@ import com.kdt.cafe.dto.OrderListRequestDTO;
 import com.kdt.cafe.dto.OrderResponseDTO;
 import com.kdt.cafe.dto.OrderSummary;
 import com.kdt.cafe.service.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderCreateRequestDTO request){
         OrderResponseDTO response = orderService.createOrder(request);
-        URI location = URI.create("/api/v1/orders/" + response.id());
-        return ResponseEntity.created(location).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }
