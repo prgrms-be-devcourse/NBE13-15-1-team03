@@ -33,11 +33,17 @@ public class CategoryService {
 
     //내부 단건 조회 - 엔티티 반환
     private Category getCategoryById(int id){
-        if (id < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"id is negative");
-        }
+        validateId(id);
         return categoryRepository.findById(id).orElseThrow(() -> new NotfoundException("missing"));
     }
+
+    //ID 검사
+    private void validateId(int id){
+        if (id < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"invalid id");
+        }
+    }
+
 
     //단건 조회
     @Transactional(readOnly = true)
@@ -86,8 +92,11 @@ public class CategoryService {
     //삭제
     @Transactional
     public void delete(int id){
-        Category category = getCategoryById(id);
-        categoryRepository.delete(category);
+        validateId(id);
+        if (!categoryRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"id not found");
+        }
+        categoryRepository.deleteById(id);
     }
 
     //카테고리 별 메뉴 조회
