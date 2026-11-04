@@ -3,6 +3,7 @@ package com.kdt.cafe.service;
 import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
+import com.kdt.cafe.entity.OrderItem;
 import com.kdt.cafe.exception.NotfoundException;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
@@ -15,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -53,11 +56,20 @@ public class OrderService {
         LocalDate shippingDate = calculateShippingDate(nowTime);
 
         // 6. Order 만들고, 항목마다 OrderItem 만들어서 추가
-        Order order = new Order(request.email(), request.address(), request.postcode(), request.memo(), nowTime, shippingDate);
+        Order order = new Order(request.email(), request.address(), request.postcode(), nowTime, shippingDate);
+
+        Map<Integer, Menu> menuById = menus.stream()
+                .collect(Collectors.toMap(Menu::getId,menu -> menu));
+
+        for (OrderItemRequestDTO itemRequest : request.items()){
+            Menu menu = menuById.get(itemRequest.menuId());
+            OrderItem orderItem = new OrderItem(menu, itemRequest.quantity(), menu.getName(), menu.getPrice());
+            order.addOrderItems(orderItem);
+        }
 
         // 7. 저장하고, 응답 DTO로 바꿔서 반환
-
-        return null;
+        Order savedOrder = orderRepository.save(order);
+        return OrderResponseDTO.from(savedOrder);
     }
 
     //배송일 계산을 위한 메서드
