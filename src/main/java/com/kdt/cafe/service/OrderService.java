@@ -9,6 +9,7 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -96,5 +97,11 @@ public class OrderService {
         return orders.stream()
                 .map(OrderSummary::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDTO getOrder(Long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
+        return OrderResponseDTO.from(order);
     }
 }
