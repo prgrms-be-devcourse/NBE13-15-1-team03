@@ -35,7 +35,7 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND)); //해당 카테고리 찾을 수 없음
     }
 
-    //Id 음수 여부 확인
+    //Id 잘못된 id 확인(0이하)
     private void validateId(int id){
         if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR,"categoryId","잘못된 아이디입니다");
         }
