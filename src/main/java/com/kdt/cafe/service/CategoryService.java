@@ -31,10 +31,14 @@ public class CategoryService {
 
     //내부 단건 조회 - 엔티티 반환
     private Category getCategoryById(int id){
-        if (id < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"id is negative");
+        validateId(id);
+        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND)); //해당 카테고리 찾을 수 없음
+    }
+
+    //Id 음수 여부 확인
+    private void validateId(int id){
+        if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //음수 Id 없음
         }
-        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
     //단건 조회
@@ -65,11 +69,11 @@ public class CategoryService {
     //카테고리명 양식 검사 (글자수, null, 공백)
     private String nameCheck(String name){
         if(name == null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is null");
+            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //카테고리명 null 불가
         }
         String onlyName = name.strip();
         if (onlyName.length()>30||onlyName.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Name is too long or empty");
+            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //카테고리명 30이내
         }
         return onlyName;
     }
@@ -77,15 +81,19 @@ public class CategoryService {
     //카테고리명 중복 검사
     private void nameAlreadyExist(String name, int id){
         if (categoryRepository.existsByNameAndIdNot(name,id)){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Name is already exists");
+            throw new BusinessLogicException(ErrorCode.CATEGORY_NAME_DUPLICATED);
         }
     }
 
-//    //삭제
-//    public Category delete(Category category){
-//        categoryRepository.delete(category);
-//        return category;
-//    }
+    //삭제
+    @Transactional
+    public void delete(int id){
+        validateId(id);
+        if (!categoryRepository.existsById(id)){
+            throw new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+        categoryRepository.deleteById(id);
+    }
 
     //카테고리 별 메뉴 조회
 //    public
