@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS category
 (
     id   INT AUTO_INCREMENT NOT NULL,
-    name VARCHAR(30)        NOT NULL,
+    name VARCHAR(30) COLLATE utf8mb4_bin NOT NULL,
     CONSTRAINT pk_category PRIMARY KEY (id)
     );
 
 CREATE TABLE IF NOT EXISTS menu
 (
     id            INT AUTO_INCREMENT NOT NULL,
-    category_id   INT                NOT NULL,
+    category_id   INT   COLLATE utf8mb4_bin  NOT NULL,
     `description` VARCHAR(300)       NOT NULL,
     name          VARCHAR(100)       NOT NULL,
     price         INT                NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS menu
 CREATE TABLE IF NOT EXISTS orders
 (
     id            BIGINT AUTO_INCREMENT NOT NULL,
-    email         VARCHAR(100)          NOT NULL,
+    email         VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
     created_at    datetime(6)           NOT NULL,
     status        VARCHAR(16)           NOT NULL,
     address       VARCHAR(200)          NOT NULL,
