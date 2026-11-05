@@ -1,12 +1,12 @@
 package com.kdt.cafe.service;
 
+import com.kdt.cafe.dto.MenuStatistics;
 import com.kdt.cafe.dto.OrderStatistics;
-import com.kdt.cafe.dto.OrderStatisticsRequestDTO;
+import com.kdt.cafe.dto.StatisticsRequestDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.entity.OrderItem;
-import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,23 +18,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /*
- * A17 접수일별 주문 통계 - OrderService.statistics 업무 규칙 테스트
- * - Repository만 모의 객체로 두고, 실제 Order/OrderItem 엔티티로 집계 로직을 실행합니다.
+ * A17 주문 통계 · A18 메뉴 통계 - OrderStatisticsService 테스트
  */
-class OrderServiceStatisticsTest {
+class OrderStatisticsServiceTest {
 
     private static final LocalDate DATE = LocalDate.of(2026, 11, 3);
 
     private OrderRepository orderRepository;
-    private OrderService orderService;
+    private OrderStatisticsService orderStatisticsService;
 
     private Menu columbia;
     private Menu brazil;
@@ -42,7 +40,7 @@ class OrderServiceStatisticsTest {
     @BeforeEach
     void setUp() {
         this.orderRepository = mock(OrderRepository.class);
-        this.orderService = new OrderService(this.orderRepository, mock(MenuRepository.class));
+        this.orderStatisticsService = new OrderStatisticsService(this.orderRepository);
 
         this.columbia = menu(1, "Columbia Nariñó", 5000);
         this.brazil = menu(2, "Brazil Serra Do Caparaó", 7000);
@@ -109,13 +107,71 @@ class OrderServiceStatisticsTest {
 
         assertEquals(DATE.atStartOfDay(), start.getValue());
         assertTrue(end.getValue().isAfter(DATE.atTime(23, 59, 59)));          // 23:59:59 접수 포함
-        assertTrue(!end.getValue().isAfter(DATE.plusDays(1).atStartOfDay())); // 다음 날 00:00:00 제외
+        assertFalse(end.getValue().isAfter(DATE.plusDays(1).atStartOfDay())); // 다음 날 00:00:00 제외
+    }
+
+    // ===== A18 접수일별 메뉴 통계 =====
+
+    @Test
+    @DisplayName("A18 같은 메뉴·주문 당시 단가·메뉴명 항목은 합산하고 메뉴 ID 오름차순으로 반환한다 (명세 예시)")
+    void menu_statistics_merge_same_items() {
+        givenOrders(
+                order(101L, item(this.brazil, 1), item(this.columbia, 2)),
+                order(102L, item(this.columbia, 1)));
+
+        assertEquals(List.of(
+                new MenuStatistics(1, "Columbia Nariñó", 5000, 3, 15000),
+                new MenuStatistics(2, "Brazil Serra Do Caparaó", 7000, 1, 7000)
+        ), menuStatistics());
+    }
+
+    @Test
+    @DisplayName("A18 취소 주문의 항목은 메뉴 통계에 포함하지 않는다 (명세 예시: 101 취소)")
+    void menu_statistics_exclude_cancelled_orders() {
+        Order order101 = order(101L, item(this.columbia, 2), item(this.brazil, 1));
+        Order order102 = order(102L, item(this.columbia, 1));
+        order101.cancel(DATE.atTime(13, 30));
+        givenOrders(order101, order102);
+
+        assertEquals(List.of(new MenuStatistics(1, "Columbia Nariñó", 5000, 1, 5000)), menuStatistics());
+    }
+
+    @Test
+    @DisplayName("A18 메뉴 ID가 같아도 주문 당시 단가·메뉴명이 다르면 따로 집계하고, 메뉴 ID → 단가 → 메뉴명 오름차순이다")
+    void menu_statistics_split_by_snapshot() {
+        // 같은 메뉴 1이지만 주문 사이에 가격·이름이 바뀐 상황
+        givenOrders(
+                order(201L, snapshotItem(this.columbia, 1, "Columbia Nariñó", 6000)),
+                order(202L, snapshotItem(this.columbia, 2, "Columbia Nariñó", 5000)),
+                order(203L, snapshotItem(this.columbia, 1, "Columbia Nariñó NEW", 5000)));
+
+        assertEquals(List.of(
+                new MenuStatistics(1, "Columbia Nariñó", 5000, 2, 10000),
+                new MenuStatistics(1, "Columbia Nariñó NEW", 5000, 1, 5000),
+                new MenuStatistics(1, "Columbia Nariñó", 6000, 1, 6000)
+        ), menuStatistics());
+    }
+
+    @Test
+    @DisplayName("A18 주문이 없거나 모두 취소된 날짜의 메뉴 통계는 빈 목록이다")
+    void menu_statistics_empty_when_no_placed_orders() {
+        givenOrders();
+        assertEquals(List.of(), menuStatistics());
+
+        Order order101 = order(101L, item(this.columbia, 2));
+        order101.cancel(DATE.atTime(13, 30));
+        givenOrders(order101);
+        assertEquals(List.of(), menuStatistics());
     }
 
     // ===== 도우미 =====
 
+    private List<MenuStatistics> menuStatistics() {
+        return this.orderStatisticsService.menuAnalytics(new StatisticsRequestDTO(DATE));
+    }
+
     private OrderStatistics statistics() {
-        return this.orderService.statistics(new OrderStatisticsRequestDTO(DATE));
+        return this.orderStatisticsService.orderAnalytics(new StatisticsRequestDTO(DATE));
     }
 
     private void givenOrders(Order... orders) {
@@ -130,6 +186,11 @@ class OrderServiceStatisticsTest {
 
     private static OrderItem item(Menu menu, int quantity) {
         return new OrderItem(menu, quantity, menu.getName(), menu.getPrice());
+    }
+
+    // 주문 당시 이름·단가가 현재 메뉴와 다른 항목
+    private static OrderItem snapshotItem(Menu menu, int quantity, String menuName, int unitPrice) {
+        return new OrderItem(menu, quantity, menuName, unitPrice);
     }
 
     // 접수일 10:00 접수 → 배송일은 같은 날

@@ -11,7 +11,7 @@ public record DeliveryBatch(
         List<Long> orderIds,
         int orderCount,
         int totalQuantity,
-        int totalAmount,
+        long totalAmount, // 묶음 합계는 int 범위를 넘을 수 있음
         List<OrderItemResponseDTO> items
 ) {
 }

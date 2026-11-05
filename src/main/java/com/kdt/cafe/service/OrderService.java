@@ -4,7 +4,6 @@ import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.entity.OrderItem;
-import com.kdt.cafe.entity.OrderStatus;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
@@ -126,37 +125,5 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
         order.updateMemo(request.memo());
         return OrderResponseDTO.from(order);
-    }
-
-    @Transactional(readOnly = true)
-    public OrderStatistics statistics(OrderStatisticsRequestDTO dto) {
-        LocalDate date = dto.date();
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.plusDays(1).atStartOfDay();
-
-        List<Order> orders = orderRepository.findAllByCreatedDate(start, end);
-
-        int placedOrderCount = 0;
-        int cancelledOrderCount = 0;
-        int totalQuantity = 0;
-        int totalAmount = 0;
-
-        for (Order order : orders) {
-            if (order.getStatus() == OrderStatus.CANCELLED) {
-                cancelledOrderCount += 1;
-                continue;
-            }
-            placedOrderCount += 1;
-            totalQuantity += order.getTotalQuantity();
-            totalAmount += order.getTotalAmount();
-        }
-
-        return new OrderStatistics(
-                date,
-                orders.size(),
-                placedOrderCount,
-                cancelledOrderCount,
-                totalQuantity,
-                totalAmount);
     }
 }
