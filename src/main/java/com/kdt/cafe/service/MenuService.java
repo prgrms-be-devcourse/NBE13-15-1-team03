@@ -8,6 +8,7 @@ import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
+import com.kdt.cafe.repository.OrderItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.kdt.cafe.exception.ErrorCode;
@@ -21,10 +22,12 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public MenuService(MenuRepository menuRepository, CategoryRepository categoryRepository) {
+    public MenuService(MenuRepository menuRepository, CategoryRepository categoryRepository, OrderItemRepository orderItemRepository) {
         this.menuRepository = menuRepository;
         this.categoryRepository = categoryRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Transactional
@@ -106,8 +109,10 @@ public class MenuService {
     @Transactional
     public void delete(Integer menuId) {
         Menu menu = this.findMenu(menuId);
-//        if(orderItemRepository)
-    this.menuRepository.delete(menu);
+        if(this.orderItemRepository.existsByMenu_Id(menuId)) {
+            throw new BusinessLogicException(ErrorCode.MENU_IN_USE);
+        }
+        this.menuRepository.delete(menu);
    }
 
 
