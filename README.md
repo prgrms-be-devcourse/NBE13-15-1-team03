@@ -1,4 +1,4 @@
-~~# NBE13-15-1-team03
+# NBE13-15-1-team03
 백엔드 13기 15회차 team03 의 첫번째 팀 프로젝트 입니다.
 
 
@@ -37,7 +37,65 @@ DB_PASSWORD: user_password
 ```
 
 **새 DB 준비**
-- 작성 예정
+
+1. 접속 확인 (kdt-mysql 컨테이너가 있을 경우)
+   - IntelliJ 오른쪽 사이드바에서 데이터베이스 창 열기
+   - 창 상단에 데이터 소스에서 MySQL 선택
+   - 연결 정보 입력: 호스트 localhost / 포트 3306 / 사용자 DB_USERNAME / 비밀번호 DB_PASSWORD
+   - 하단에 "누락된 드라이버 파일 다운로드"가 뜨면 눌러서 설치
+   - "연결 테스트" 눌러서 성공이 뜨면 확인
+
+   <br>
+   
+2. DB 만들기: SQL 콘솔에서 다음 실행
+
+```sql
+CREATE DATABASE cafe;
+```
+
+3. 테이블 생성: 콘솔 우상단의 schema에서 cafe 선택 후 SQL 실행
+```sql
+CREATE TABLE category (
+    id    INT    NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(30)    NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE orders (
+    id    int    NOT NULL AUTO_INCREMENT,
+    email    varchar(100)    NULL,
+    created_at    datetime    NULL,
+    status    varchar(16)    NULL,
+    address    varchar(200)    NULL,
+    postcode    varchar(5)    NULL,
+    memo    varchar(200)    NULL,
+    shipping_date    datetime    NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE menu (
+    id    int    NOT NULL AUTO_INCREMENT,
+    description    varchar(300)    NULL,
+    name    varchar(100)    NULL,
+    price    INT    NULL,
+    available    boolean    NULL,
+    category_id    INT    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (category_id) REFERENCES category(id)
+);
+
+CREATE TABLE order_items (
+    id    int    NOT NULL AUTO_INCREMENT,
+    quantity    int    NULL,
+    menu_name    varchar(100)    NULL,
+    unitPrice    int    NULL,
+    menu_id    int    NOT NULL,
+    order_id    int    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (menu_id) REFERENCES menu(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+```
 
 **초기 데이터 등록 절차**
 - 작성 예정
