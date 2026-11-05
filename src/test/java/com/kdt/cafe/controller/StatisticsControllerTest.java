@@ -1,5 +1,6 @@
 package com.kdt.cafe.controller;
 
+import com.kdt.cafe.dto.CustomerStatistics;
 import com.kdt.cafe.dto.MenuStatistics;
 import com.kdt.cafe.dto.OrderStatistics;
 import com.kdt.cafe.dto.StatisticsRequestDTO;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /*
  * 실제 StatisticsController + 모의 OrderStatisticsService + MockMvc
- * - A17·A18 경로, 상태 코드, 응답 JSON 모양, date 쿼리 파라미터 검사를 확인합니다.
+ * - A17·A18·A24 경로, 상태 코드, 응답 JSON 모양, date 쿼리 파라미터 검사를 확인합니다.
  * - 집계 규칙은 OrderStatisticsServiceTest에서 확인합니다.
  */
 @WebMvcTest(StatisticsController.class)
@@ -144,6 +145,62 @@ class StatisticsControllerTest {
                 .andExpect(jsonPath("$.fieldErrors.date").isNotEmpty());
 
         this.mockMvc.perform(get("/api/v1/statistics/menus").param("date", "1999-12-31"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors.date").isNotEmpty());
+
+        verifyNoInteractions(this.orderStatisticsService);
+    }
+
+    // ===== A24 접수일별 고객 통계 =====
+
+    @Test
+    @DisplayName("A24 접수일별 고객 통계는 200과 CustomerStatistics 필드 7개를 담은 JSON 배열을 서비스가 준 순서대로 반환한다")
+    void customers_returns_200_with_customer_statistics_fields() throws Exception {
+        given(this.orderStatisticsService.customerAnalytics(new StatisticsRequestDTO(DATE)))
+                .willReturn(List.of(
+                        new CustomerStatistics(DATE, "alice@example.com", 1, 0, 1, 0, 0),
+                        new CustomerStatistics(DATE, "buyer@example.com", 2, 1, 1, 1, 5000)));
+
+        this.mockMvc.perform(get("/api/v1/statistics/customers").param("date", "2026-11-03"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].length()").value(7))
+                .andExpect(jsonPath("$[0].date").value("2026-11-03"))
+                .andExpect(jsonPath("$[0].email").value("alice@example.com"))
+                .andExpect(jsonPath("$[0].placedOrderCount").value(0))
+                .andExpect(jsonPath("$[0].totalAmount").value(0))
+                .andExpect(jsonPath("$[1].email").value("buyer@example.com"))
+                .andExpect(jsonPath("$[1].orderCount").value(2))
+                .andExpect(jsonPath("$[1].placedOrderCount").value(1))
+                .andExpect(jsonPath("$[1].cancelledOrderCount").value(1))
+                .andExpect(jsonPath("$[1].totalQuantity").value(1))
+                .andExpect(jsonPath("$[1].totalAmount").value(5000));
+
+        verify(this.orderStatisticsService).customerAnalytics(new StatisticsRequestDTO(DATE));
+    }
+
+    @Test
+    @DisplayName("A24 주문이 없는 날짜의 고객 통계는 404가 아니라 200과 빈 배열을 반환한다")
+    void customers_returns_200_and_empty_array_when_no_orders() throws Exception {
+        given(this.orderStatisticsService.customerAnalytics(new StatisticsRequestDTO(DATE))).willReturn(List.of());
+
+        this.mockMvc.perform(get("/api/v1/statistics/customers").param("date", "2026-11-03"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    @DisplayName("A24 date가 없거나 실제 없는 날짜면 400 VALIDATION_ERROR와 fieldErrors.date를 반환하고 서비스를 호출하지 않는다")
+    void customers_invalid_date_returns_400() throws Exception {
+        this.mockMvc.perform(get("/api/v1/statistics/customers"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("입력값을 확인해 주세요."))
+                .andExpect(jsonPath("$.fieldErrors.date").isNotEmpty());
+
+        this.mockMvc.perform(get("/api/v1/statistics/customers").param("date", "2026-02-30"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.fieldErrors.date").isNotEmpty());

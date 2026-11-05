@@ -1,5 +1,6 @@
 package com.kdt.cafe.controller;
 
+import com.kdt.cafe.dto.CustomerStatistics;
 import com.kdt.cafe.dto.MenuStatistics;
 import com.kdt.cafe.dto.OrderStatistics;
 import com.kdt.cafe.dto.StatisticsRequestDTO;
@@ -33,5 +34,12 @@ public class StatisticsController {
     public List<MenuStatistics> menuAnalytics(@Valid StatisticsRequestDTO dto){
         return orderStatisticsService.menuAnalytics(dto);
     }
+
+    @GetMapping("/customers")
+    @ResponseStatus(HttpStatus.OK)
+    public List<CustomerStatistics> customerAnalytics(@Valid StatisticsRequestDTO dto){
+        return orderStatisticsService.customerAnalytics(dto);
+    }
+
 
 }
