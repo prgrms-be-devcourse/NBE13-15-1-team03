@@ -10,15 +10,14 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.servlet.filter.OrderedRequestContextFilter;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,7 +56,7 @@ public class OrderService {
 
         // 5. 현재 시각 구하고, 배송일 계산
         LocalDateTime nowTime = now();
-        LocalDate shippingDate = calculateShippingDate(nowTime);
+        LocalDate shippingDate = Order.calculateShippingDate(nowTime);
 
         // 6. Order 만들고, 항목마다 OrderItem 만들어서 추가
         Order order = new Order(email, address, postcode, nowTime, shippingDate);
@@ -87,17 +86,6 @@ public class OrderService {
                 .toList();
 
         return placeOrder(original.getEmail(), original.getAddress(), original.getPostcode(), items);
-    }
-
-    //배송일 계산을 위한 메서드
-    private LocalDate calculateShippingDate(LocalDateTime orderAt) {
-        LocalDate orderDate = orderAt.toLocalDate(); //날짜
-        LocalTime orderTime = orderAt.toLocalTime(); //시간
-
-        if (orderTime.isBefore(Order.SHIPPING_CUTOFF)){ // 14:00:00 이전일 경우에 true 즉, 13:59:59는 true
-            return orderDate; // 14:00 전 -> 당일
-        }
-        return orderDate.plusDays(1); // 14:00 정각부터 -> 다음 날
     }
 
     @Autowired
@@ -138,5 +126,37 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
         order.updateMemo(request.memo());
         return OrderResponseDTO.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderStatistics statistics(OrderStatisticsRequestDTO dto) {
+        LocalDate date = dto.date();
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+        List<Order> orders = orderRepository.findAllByCreatedDate(start, end);
+
+        int placedOrderCount = 0;
+        int cancelledOrderCount = 0;
+        int totalQuantity = 0;
+        int totalAmount = 0;
+
+        for (Order order : orders) {
+            if (order.getStatus() == OrderStatus.CANCELLED) {
+                cancelledOrderCount += 1;
+                continue;
+            }
+            placedOrderCount += 1;
+            totalQuantity += order.getTotalQuantity();
+            totalAmount += order.getTotalAmount();
+        }
+
+        return new OrderStatistics(
+                date,
+                orders.size(),
+                placedOrderCount,
+                cancelledOrderCount,
+                totalQuantity,
+                totalAmount);
     }
 }

@@ -12,7 +12,7 @@ public class DateValidator implements ConstraintValidator<ValidDate, LocalDate> 
     @Override
     public boolean isValid(LocalDate date, ConstraintValidatorContext context) {
         if (date == null) {
-            return true; // 누락은 @NotNull 담당
+            return true;
         }
         return !date.isBefore(MIN) && !date.isAfter(MAX);
     }

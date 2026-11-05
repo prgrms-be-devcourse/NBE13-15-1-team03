@@ -9,7 +9,7 @@ public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context) {
         if (email == null) {
-            return true; // 누락은 @NotNull 담당
+            return true;
         }
         return email.matches(EMAIL_REGEX);
     }
