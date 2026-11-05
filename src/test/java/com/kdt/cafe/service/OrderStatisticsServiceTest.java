@@ -1,5 +1,6 @@
 package com.kdt.cafe.service;
 
+import com.kdt.cafe.dto.CustomerStatistics;
 import com.kdt.cafe.dto.MenuStatistics;
 import com.kdt.cafe.dto.OrderStatistics;
 import com.kdt.cafe.dto.StatisticsRequestDTO;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /*
- * A17 주문 통계 · A18 메뉴 통계 - OrderStatisticsService 테스트
+ * A17 주문 통계 · A18 메뉴 통계 · A24 고객 통계 - OrderStatisticsService 테스트
  */
 class OrderStatisticsServiceTest {
 
@@ -164,7 +165,71 @@ class OrderStatisticsServiceTest {
         assertEquals(List.of(), menuStatistics());
     }
 
+    // ===== A24 접수일별 고객 통계 =====
+
+    @Test
+    @DisplayName("A24 같은 이메일 주문은 한 줄로 집계하고, 값은 주문 통계와 같은 규칙이다 (명세 예시)")
+    void customer_statistics_group_by_email() {
+        givenOrders(
+                order(101L, BUYER, item(this.columbia, 2), item(this.brazil, 1)),
+                order(102L, BUYER, item(this.columbia, 1)));
+
+        assertEquals(List.of(new CustomerStatistics(DATE, BUYER, 2, 2, 0, 4, 22000)), customerStatistics());
+    }
+
+    @Test
+    @DisplayName("A24 취소 주문은 전체·CANCELLED 건수에만 포함하고 수량·금액에서는 제외한다 (명세 예시: 101 취소)")
+    void customer_statistics_exclude_cancelled_amounts() {
+        Order order101 = order(101L, BUYER, item(this.columbia, 2), item(this.brazil, 1));
+        Order order102 = order(102L, BUYER, item(this.columbia, 1));
+        order101.cancel(DATE.atTime(13, 30));
+        givenOrders(order101, order102);
+
+        assertEquals(List.of(new CustomerStatistics(DATE, BUYER, 2, 1, 1, 1, 5000)), customerStatistics());
+    }
+
+    @Test
+    @DisplayName("A24 주문을 모두 취소한 고객도 포함하고, PLACED 건수·수량·금액은 0이다")
+    void customer_statistics_include_all_cancelled_customer() {
+        Order cancelled = order(201L, "alice@example.com", item(this.columbia, 5));
+        cancelled.cancel(DATE.atTime(13, 30));
+        givenOrders(cancelled, order(202L, BUYER, item(this.columbia, 1)));
+
+        assertEquals(List.of(
+                new CustomerStatistics(DATE, "alice@example.com", 1, 0, 1, 0, 0),
+                new CustomerStatistics(DATE, BUYER, 1, 1, 0, 1, 5000)
+        ), customerStatistics());
+    }
+
+    @Test
+    @DisplayName("A24 이메일은 대소문자를 구분해 다른 고객이고, 결과는 이메일 오름차순이다")
+    void customer_statistics_sorted_by_email_case_sensitive() {
+        givenOrders(
+                order(301L, "carol@example.com", item(this.columbia, 1)),
+                order(302L, BUYER, item(this.columbia, 1)),
+                order(303L, "Buyer@example.com", item(this.columbia, 1)),
+                order(304L, "alice@example.com", item(this.columbia, 1)));
+
+        // 문자 코드 순서: 대문자(B=66)가 소문자(a=97)보다 앞
+        List<String> emails = customerStatistics().stream().map(CustomerStatistics::email).toList();
+        assertEquals(List.of("Buyer@example.com", "alice@example.com", BUYER, "carol@example.com"), emails);
+    }
+
+    @Test
+    @DisplayName("A24 주문이 없는 날짜의 고객 통계는 빈 목록이다")
+    void customer_statistics_empty_when_no_orders() {
+        givenOrders();
+
+        assertEquals(List.of(), customerStatistics());
+    }
+
     // ===== 도우미 =====
+
+    private static final String BUYER = "buyer@example.com";
+
+    private List<CustomerStatistics> customerStatistics() {
+        return this.orderStatisticsService.customerAnalytics(new StatisticsRequestDTO(DATE));
+    }
 
     private List<MenuStatistics> menuStatistics() {
         return this.orderStatisticsService.menuAnalytics(new StatisticsRequestDTO(DATE));
@@ -195,7 +260,11 @@ class OrderStatisticsServiceTest {
 
     // 접수일 10:00 접수 → 배송일은 같은 날
     private static Order order(Long id, OrderItem... items) {
-        Order order = new Order("buyer@example.com", "서울시 실습로 10 101호", "01234", DATE.atTime(10, 0), DATE);
+        return order(id, BUYER, items);
+    }
+
+    private static Order order(Long id, String email, OrderItem... items) {
+        Order order = new Order(email, "서울시 실습로 10 101호", "01234", DATE.atTime(10, 0), DATE);
         ReflectionTestUtils.setField(order, "id", id);
         for (OrderItem item : items) {
             order.addOrderItems(item);
