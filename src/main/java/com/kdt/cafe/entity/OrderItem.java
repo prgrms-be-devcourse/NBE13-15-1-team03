@@ -18,7 +18,7 @@ public class OrderItem {
     @Column(nullable = false, length = 100)
     private String menuName;
 
-    @Column(nullable = false)
+    @Column(name = "price", nullable = false)
     private int unitPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
