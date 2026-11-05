@@ -16,4 +16,12 @@ public record MenuUpdateRequestDTO(
         @Size(max = 300, message = "설명은 300자를 넘어갈 수 없습니다.")
         String description
 ) {
+        public MenuUpdateRequestDTO {
+                if(name != null){
+                        name = name.strip();
+                }
+                if(description != null){
+                        description = description.strip();
+                }
+        }
 }
