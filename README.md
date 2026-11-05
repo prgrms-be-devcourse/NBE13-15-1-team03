@@ -1,4 +1,4 @@
-~~# NBE13-15-1-team03
+# NBE13-15-1-team03
 백엔드 13기 15회차 team03 의 첫번째 팀 프로젝트 입니다.
 
 
@@ -44,17 +44,16 @@ DB_PASSWORD: user_password
    - 연결 정보 입력: 호스트 localhost / 포트 3306 / 사용자 DB_USERNAME / 비밀번호 DB_PASSWORD
    - 하단에 "누락된 드라이버 파일 다운로드"가 뜨면 눌러서 설치
    - "연결 테스트" 눌러서 성공이 뜨면 확인
-     <br>
+
+   <br>
+   
 2. DB 만들기: SQL 콘솔에서 다음 실행
 
 ```sql
 CREATE DATABASE cafe;
 ```
 
-3. 테이블 생성: 콘솔 우상단의 schema에서 cafe 선택 후 실행
-<br>
-방법1 : SQL문 직접 사용하기
-
+3. 테이블 생성: 콘솔 우상단의 schema에서 cafe 선택 후 SQL 실행
 ```sql
 CREATE TABLE category (
     id    INT    NOT NULL AUTO_INCREMENT,
@@ -97,20 +96,6 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 ```
-방법2 : JPA 자동 생성 사용하기
-<br>
-application-local.yaml의 spring: 내부에 설정 추가 후 실행
-
-```yaml
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-```
-
-- 콘솔에 create table category (...) 등의 SQL 확인, 데이터베이스 창의 테이블 확인
-- create는 실행할 때마다 데이터를 지움에 유의
 
 **초기 데이터 등록 절차**
 - 작성 예정
