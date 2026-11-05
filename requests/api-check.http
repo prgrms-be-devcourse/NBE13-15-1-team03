@@ -1,0 +1,271 @@
+################################################################################
+# 카페 API 확인 요청
+# 실행 순서: 위에서부터 차례로 실행 ("→ ... 입력"이 붙은 요청은 응답 값을 아래 변수에 넣은 뒤 다음으로 진행)
+# 준비 데이터: 빈 DB에서 앱 실행 시 DataInitializer가 등록 (카테고리 싱글오리진·블렌드, 메뉴 4개 / ID 1·2, 1~4)
+# A11부터 [409-1]까지는 14:00을 사이에 두지 않고 실행 (같은 배송일로 묶이도록)
+################################################################################
+
+@baseUrl = http://127.0.0.1:8080
+
+@seedCategoryId = 1
+@seedMenuId1 = 1
+@seedMenuId2 = 2
+
+@categoryId = 3
+@menuId = 5
+@orderId = 1
+@reorderId = 2
+
+@shippingDate = 2026-11-05
+@orderDate = 2026-11-05
+
+@email = buyer@example.com
+
+
+################################################################################
+# 1. 카테고리
+################################################################################
+
+### A01 카테고리 목록
+# 기대: 200 / Category[] ID 오름차순 / 각 항목 id·name
+# 비교: 초기 데이터 "싱글오리진", "블렌드" 포함 → 싱글오리진의 실제 id를 @seedCategoryId에 반영
+GET {{baseUrl}}/api/v1/categories
+
+### A02 카테고리 상세
+# 기대: 200 / {"id": @seedCategoryId, "name": "싱글오리진"}
+GET {{baseUrl}}/api/v1/categories/{{seedCategoryId}}
+
+### A03 카테고리 등록  → 응답 id를 @categoryId에 입력
+# 기대: 201 / {"id": 새 ID, "name": "디카페인"}
+POST {{baseUrl}}/api/v1/categories
+Content-Type: application/json
+
+{
+  "name": "디카페인"
+}
+
+### A04 카테고리 수정
+# 기대: 200 / {"id": @categoryId, "name": "디카페인 원두"}
+PUT {{baseUrl}}/api/v1/categories/{{categoryId}}
+Content-Type: application/json
+
+{
+  "name": "디카페인 원두"
+}
+
+
+################################################################################
+# 2. 메뉴
+################################################################################
+
+### A06 전체 메뉴
+# 기대: 200 / Menu[] ID 오름차순 / 각 항목 id·categoryId·name·price·description·available
+# 비교: 초기 메뉴 4개 확인 → Columbia Nariñó, Brazil Serra Do Caparaó의 실제 id를 @seedMenuId1·2에 반영
+GET {{baseUrl}}/api/v1/menus
+
+### A08 메뉴 등록  → 응답 id를 @menuId에 입력
+# 기대: 201 / categoryId=@categoryId, available=true
+POST {{baseUrl}}/api/v1/menus
+Content-Type: application/json
+
+{
+  "categoryId": {{categoryId}},
+  "name": "Decaf Colombia",
+  "price": 8000,
+  "description": "디카페인 콜롬비아 원두 패키지입니다."
+}
+
+### A07 메뉴 상세
+# 기대: 200 / {"id": @menuId, "name": "Decaf Colombia", "price": 8000, "available": true, ...}
+GET {{baseUrl}}/api/v1/menus/{{menuId}}
+
+### A09 메뉴 일반 수정
+# 기대: 200 / price 8500, description "" / available은 기존 값(true) 유지
+PUT {{baseUrl}}/api/v1/menus/{{menuId}}
+Content-Type: application/json
+
+{
+  "categoryId": {{categoryId}},
+  "name": "Decaf Colombia",
+  "price": 8500,
+  "description": ""
+}
+
+### A15 카테고리별 메뉴
+# 기대: 200 / Menu[] 1개 (방금 등록한 Decaf Colombia)
+GET {{baseUrl}}/api/v1/categories/{{categoryId}}/menus
+
+### A19 판매 중 메뉴
+# 기대: 200 / available=true인 메뉴만, ID 오름차순 (초기 메뉴 4개 + Decaf Colombia)
+GET {{baseUrl}}/api/v1/menus/available
+
+### A20 메뉴명 검색
+# 기대: 200 / 이름에 "Columbia"가 들어간 메뉴(영문 대소문자 구분), ID 오름차순
+# 비교: Columbia Nariñó, Columbia Quindío (White Wine Extended Fermentation) 2개
+GET {{baseUrl}}/api/v1/menus/search?keyword=Columbia
+
+### A21 판매 여부 변경 (판매 중지)
+# 기대: 200 / 전체 Menu, available=false (다른 값은 그대로)
+PUT {{baseUrl}}/api/v1/menus/{{menuId}}/availability
+Content-Type: application/json
+
+{
+  "available": false
+}
+
+
+################################################################################
+# 3. 주문
+################################################################################
+
+### A11 주문 접수  → 응답 id를 @orderId, shippingDate를 @shippingDate, createdAt의 날짜를 @orderDate에 입력
+# 기대: 201 / status=PLACED, cancelledAt=null, memo=""
+# 비교: items 단가는 DB 가격 5000·7000, lineAmount 10000·7000, totalAmount 17000
+#       createdAt은 +09:00 / 14:00 전 접수면 shippingDate=접수일, 14:00부터면 다음 날
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "address": "서울시 실습로 10 101호",
+  "postcode": "01234",
+  "items": [
+    { "menuId": {{seedMenuId1}}, "quantity": 2 },
+    { "menuId": {{seedMenuId2}}, "quantity": 1 }
+  ]
+}
+
+### A12 이메일별 주문
+# 기대: 200 / OrderSummary[] (id·createdAt·shippingDate·totalAmount·status)
+# 비교: 접수 시각 내림차순, 같으면 ID 내림차순 / @orderId 포함, totalAmount 17000
+GET {{baseUrl}}/api/v1/orders?email={{email}}
+
+### A13 주문 상세
+# 기대: 200 / 전체 Order (A11 응답과 같은 값)
+GET {{baseUrl}}/api/v1/orders/{{orderId}}
+
+### A22 주문 메모 수정
+# 기대: 200 / 전체 Order에서 memo만 "주문 확인 완료"로 변경, 나머지 값 유지
+PUT {{baseUrl}}/api/v1/orders/{{orderId}}/memo
+Content-Type: application/json
+
+{
+  "memo": "주문 확인 완료"
+}
+
+
+################################################################################
+# 4. 배송 묶음 · 통계
+################################################################################
+
+### A14 배송 묶음
+# 기대: 200 / DeliveryBatch[] 이메일 오름차순
+# 비교: @email 묶음의 orderIds에 @orderId 포함(오름차순), orderCount = orderIds 길이
+#       totalQuantity 3, totalAmount 17000 (빈 DB에서 A11만 접수한 경우)
+GET {{baseUrl}}/api/v1/delivery-batches?shippingDate={{shippingDate}}
+
+### A17 접수일별 주문 통계
+# 기대: 200 / {date, orderCount, placedOrderCount, cancelledOrderCount, totalQuantity, totalAmount}
+# 비교: 빈 DB에서 A11만 접수한 경우 1·1·0·3·17000
+GET {{baseUrl}}/api/v1/statistics/orders?date={{orderDate}}
+
+### A18 접수일별 메뉴 통계
+# 기대: 200 / MenuStatistics[] 메뉴 ID → 단가 → 메뉴명 오름차순, PLACED 항목만
+# 비교: 빈 DB에서 A11만 접수한 경우 Columbia Nariñó 수량 2·금액 10000, Brazil Serra Do Caparaó 수량 1·금액 7000
+GET {{baseUrl}}/api/v1/statistics/menus?date={{orderDate}}
+
+### A24 접수일별 고객 통계
+# 기대: 200 / CustomerStatistics[] 이메일 오름차순(대소문자 구분)
+# 비교: @email 줄의 값이 A17 응답과 같음
+GET {{baseUrl}}/api/v1/statistics/customers?date={{orderDate}}
+
+
+################################################################################
+# 5. 재주문 · 취소
+################################################################################
+
+### A23 재주문  → 응답 id를 @reorderId에 입력
+# 기대: 201 / 새 ID, status=PLACED, cancelledAt=null, memo=""
+# 비교: 이메일·주소·우편번호·메뉴 ID·수량은 원본과 같고, 메뉴명·단가는 현재 DB 값 / 원본 @orderId는 변경 없음
+POST {{baseUrl}}/api/v1/orders/{{orderId}}/reorder
+
+### A16 주문 취소 (재주문한 @reorderId를 취소)
+# 기대: 200 / 전체 Order에서 status=CANCELLED, cancelledAt=처리 시각(+09:00)만 변경, 금액·항목 유지
+POST {{baseUrl}}/api/v1/orders/{{reorderId}}/cancel
+
+
+################################################################################
+# 6. 오류 요청 6개 (입력 오류 400 ×2 / 대상 없음 404 ×1 / 업무 조건 위반 409 ×3)
+################################################################################
+
+### [400-1] 주문 접수 - 이메일 형식 오류 (규칙: 이메일 정규식 전체 일치)
+# 기대: 400 / code=VALIDATION_ERROR, message="입력값을 확인해 주세요." / fieldErrors.email 존재
+# 비교: 주문이 새로 생기지 않음 (A12 목록 개수 변화 없음)
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "email": "buyer@example",
+  "address": "서울시 실습로 10 101호",
+  "postcode": "01234",
+  "items": [
+    { "menuId": {{seedMenuId1}}, "quantity": 1 }
+  ]
+}
+
+### [400-2] 주문 통계 - 날짜 범위 오류 (규칙: URL 날짜는 2000-01-01~2099-12-31)
+# 기대: 400 / code=VALIDATION_ERROR, message="입력값을 확인해 주세요." / fieldErrors.date 존재
+GET {{baseUrl}}/api/v1/statistics/orders?date=2100-01-01
+
+### [404] 주문 상세 - 없는 주문
+# 기대: 404 / code=ORDER_NOT_FOUND, message="주문을 찾을 수 없습니다.", fieldErrors={}
+GET {{baseUrl}}/api/v1/orders/999999999
+
+### [409-1] 주문 접수 - 배송지 불일치 (같은 이메일·배송일의 PLACED 주문 @orderId와 주소가 다름)
+# 기대: 409 / code=ADDRESS_MISMATCH, message="같은 이메일과 배송일의 기존 주문과 배송지가 다릅니다.", fieldErrors={}
+# 준비: A11 주문이 PLACED이고, A11과 같은 배송일(14:00을 넘기지 않음)에 실행
+# 비교: 주문이 새로 생기지 않음
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "address": "서울시 실습로 20 202호",
+  "postcode": "01234",
+  "items": [
+    { "menuId": {{seedMenuId1}}, "quantity": 1 }
+  ]
+}
+
+### [409-2] 주문 접수 - 판매 중지 메뉴 포함 (A21에서 판매 중지한 @menuId)
+# 기대: 409 / code=MENU_UNAVAILABLE, message="판매 중지된 메뉴가 포함되어 있습니다.", fieldErrors={}
+# 비교: 주문이 새로 생기지 않음
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "email": "other@example.com",
+  "address": "서울시 실습로 30 303호",
+  "postcode": "04567",
+  "items": [
+    { "menuId": {{menuId}}, "quantity": 1 }
+  ]
+}
+
+### [409-3] 메뉴 삭제 - 주문에 사용된 메뉴 (A11에서 주문한 @seedMenuId1)
+# 기대: 409 / code=MENU_IN_USE, message="주문에 사용된 메뉴는 삭제할 수 없습니다.", fieldErrors={}
+# 비교: A07로 @seedMenuId1을 조회하면 메뉴가 그대로 남아 있음
+DELETE {{baseUrl}}/api/v1/menus/{{seedMenuId1}}
+
+
+################################################################################
+# 7. 삭제 (마지막에 실행)
+################################################################################
+
+### A10 메뉴 삭제 (주문 이력이 없는 @menuId)
+# 기대: 204 / 빈 본문
+DELETE {{baseUrl}}/api/v1/menus/{{menuId}}
+
+### A05 카테고리 삭제 (소속 메뉴가 없어진 @categoryId)
+# 기대: 204 / 빈 본문
+DELETE {{baseUrl}}/api/v1/categories/{{categoryId}}
