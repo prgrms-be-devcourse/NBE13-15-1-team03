@@ -4,6 +4,7 @@ import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.entity.OrderItem;
+import com.kdt.cafe.entity.OrderStatus;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
@@ -57,6 +58,9 @@ public class OrderService {
         LocalDateTime nowTime = now();
         LocalDate shippingDate = Order.calculateShippingDate(nowTime);
 
+        // 5-1. 같은 이메일·배송일의 PLACED 주문과 배송지가 다르면 거절
+        validateSameAddress(email, shippingDate, address, postcode);
+
         // 6. Order 만들고, 항목마다 OrderItem 만들어서 추가
         Order order = new Order(email, address, postcode, nowTime, shippingDate);
 
@@ -72,6 +76,24 @@ public class OrderService {
         // 7. 저장하고, 응답 DTO로 바꿔서 반환
         Order savedOrder = orderRepository.save(order);
         return OrderResponseDTO.from(savedOrder);
+    }
+
+    // 같은 이메일·배송일의 기존 PLACED 주문(배송 묶음)과 주소·우편번호가 다르면 409 ADDRESS_MISMATCH
+    // 기존 주문이 모두 취소됐다면 PLACED가 없으므로 새 주소로 주문 가능
+    private void validateSameAddress(String email, LocalDate shippingDate, String address, String postcode) {
+        List<Order> placedOrders = orderRepository.findByEmailAndShippingDateAndStatus(email, shippingDate, OrderStatus.PLACED);
+
+        for (Order placed : placedOrders) {
+            if (!placed.getEmail().equals(email)) {
+                continue;
+            }
+            // 앞뒤 공백 제거 후 비교, 중간 표기·대소문자는 그대로 비교
+            boolean sameAddress = placed.getAddress().strip().equals(address.strip());
+            boolean samePostcode = placed.getPostcode().strip().equals(postcode.strip());
+            if (!sameAddress || !samePostcode) {
+                throw new BusinessLogicException(ErrorCode.ADDRESS_MISMATCH);
+            }
+        }
     }
 
     @Transactional
@@ -101,8 +123,10 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderSummary> getOrdersByEmail(OrderListRequestDTO dto){
-        List<Order> orders = orderRepository.findByEmail(dto.email());
+        List<Order> orders = orderRepository.findByEmailOrderByCreatedAtDescIdDesc(dto.email());
         return orders.stream()
+                // MySQL 기본 정렬 규칙은 대소문자를 구분하지 않으므로 이메일은 자바에서 한 번 더 비교
+                .filter(order -> order.getEmail().equals(dto.email()))
                 .map(OrderSummary::from)
                 .toList();
     }
