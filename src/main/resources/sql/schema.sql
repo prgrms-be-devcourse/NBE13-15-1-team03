@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS order_items
     id         BIGINT AUTO_INCREMENT NOT NULL,
     quantity   INT                   NOT NULL,
     menu_name  VARCHAR(100)          NOT NULL,
-    unit_price INT                   NOT NULL,
+    price      INT                   NOT NULL,
     order_id   BIGINT                NOT NULL,
     menu_id    INT                   NOT NULL,
     CONSTRAINT pk_order_items PRIMARY KEY (id)
