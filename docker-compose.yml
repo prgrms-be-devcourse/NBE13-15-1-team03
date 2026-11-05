@@ -1,0 +1,8 @@
+services:
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: kdt-spring
