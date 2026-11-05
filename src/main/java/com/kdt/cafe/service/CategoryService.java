@@ -33,9 +33,9 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND)); //해당 카테고리 찾을 수 없음
     }
 
-    //Id 음수 여부 확인
+    //Id 잘못된 id 확인(0이하)
     private void validateId(int id){
-        if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //음수 Id 없음
+        if (id < 1) {throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR,"categoryId","잘못된 아이디입니다");
         }
     }
 
@@ -48,9 +48,8 @@ public class CategoryService {
     //등록
     @Transactional
     public CategoryResponseDTO save(CategoryRequestDTO categoryRequestDTO) {
-        String checkedName = nameCheck(categoryRequestDTO.name());
-        nameAlreadyExist(checkedName,0);
-        Category category = new Category(checkedName);
+        nameAlreadyExist(categoryRequestDTO.name(),0);
+        Category category = new Category(categoryRequestDTO.name());
         return CategoryResponseDTO.from(categoryRepository.save(category));
     }
 
@@ -58,22 +57,9 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO update(int id, CategoryRequestDTO categoryRequestDTO) {
         Category category = getCategoryById(id);
-        String checkedName = nameCheck(categoryRequestDTO.name());
-        nameAlreadyExist(checkedName,id);
-        category.setName(checkedName);
+        nameAlreadyExist(categoryRequestDTO.name(),id);
+        category.setName(categoryRequestDTO.name());
         return CategoryResponseDTO.from(category);
-    }
-
-    //카테고리명 양식 검사 (글자수, null, 공백)
-    private String nameCheck(String name){
-        if(name == null){
-            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //카테고리명 null 불가
-        }
-        String onlyName = name.strip();
-        if (onlyName.length()>30||onlyName.isEmpty()){
-            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR); //카테고리명 30이내
-        }
-        return onlyName;
     }
 
     //카테고리명 중복 검사
