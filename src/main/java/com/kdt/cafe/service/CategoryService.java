@@ -3,14 +3,12 @@ package com.kdt.cafe.service;
 import com.kdt.cafe.dto.CategoryRequestDTO;
 import com.kdt.cafe.dto.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
-import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.exception.BusinessLogicException;
+import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 

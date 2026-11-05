@@ -16,6 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select distinct o from Order o join fetch o.orderItems where o.shippingDate = :shippingDate and o.status = :status order by o.id asc")
     List<Order> findByShippingDateAndStatus(LocalDate shippingDate, OrderStatus status);
     //같은 접수일의 모든 주문 가져오기
-    @Query("select o from Order o where o.createdAt >= :start and o.createdAt < :end")
+    @Query("select o from Order o join fetch o.orderItems where o.createdAt >= :start and o.createdAt < :end")
     List<Order> findAllByCreatedDate(LocalDateTime start, LocalDateTime end);
 }

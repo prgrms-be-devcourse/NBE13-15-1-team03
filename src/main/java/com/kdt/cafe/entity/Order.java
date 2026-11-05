@@ -67,6 +67,17 @@ public class Order {
         this.cancelledAt = null;
     }
 
+    // 배송일 계산: 14:00:00 전 접수 → 당일, 14:00:00부터 → 다음 날 (연말이면 다음 해로 넘어감)
+    public static LocalDate calculateShippingDate(LocalDateTime orderAt) {
+        LocalDate orderDate = orderAt.toLocalDate(); //날짜
+        LocalTime orderTime = orderAt.toLocalTime(); //시간
+
+        if (orderTime.isBefore(SHIPPING_CUTOFF)){ // 14:00:00 이전일 경우에 true 즉, 13:59:59는 true
+            return orderDate; // 14:00 전 -> 당일
+        }
+        return orderDate.plusDays(1); // 14:00 정각부터 -> 다음 날
+    }
+
     public void addOrderItems(OrderItem orderItem){
         if (orderItem == null) {
             throw new IllegalArgumentException("주문 항목은 null일 수 없습니다.");
