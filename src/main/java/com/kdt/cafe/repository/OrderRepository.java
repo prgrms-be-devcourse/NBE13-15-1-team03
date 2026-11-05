@@ -1,7 +1,8 @@
 package com.kdt.cafe.repository;
 
-import com.kdt.cafe.entity.Order;
-import com.kdt.cafe.entity.OrderStatus;
+import com.kdt.cafe.entity.order.Order;
+import com.kdt.cafe.entity.order.OrderStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,6 +1,7 @@
 package com.kdt.cafe.utils.validate;
 
-import com.kdt.cafe.dto.OrderItemRequestDTO;
+import com.kdt.cafe.dto.order.OrderItemRequestDTO;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

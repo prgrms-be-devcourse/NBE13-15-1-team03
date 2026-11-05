@@ -1,11 +1,12 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.CategoryRequestDTO;
-import com.kdt.cafe.dto.CategoryResponseDTO;
+import com.kdt.cafe.dto.category.CategoryRequestDTO;
+import com.kdt.cafe.dto.category.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,11 +1,12 @@
 package com.kdt.cafe.controller;
 
 
-import com.kdt.cafe.dto.MenuAvailabilityUpdateRequestDTO;
-import com.kdt.cafe.dto.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.MenuResponseDTO;
-import com.kdt.cafe.dto.MenuUpdateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuAvailabilityUpdateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuResponseDTO;
+import com.kdt.cafe.dto.menu.MenuUpdateRequestDTO;
 import com.kdt.cafe.service.MenuService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
