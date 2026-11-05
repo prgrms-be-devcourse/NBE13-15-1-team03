@@ -61,16 +61,16 @@ use cafe;
 CREATE TABLE IF NOT EXISTS category
 (
    id   INT AUTO_INCREMENT NOT NULL,
-   name VARCHAR(30)        NOT NULL,
+   name VARCHAR(30) COLLATE utf8mb4_bin  NOT NULL,
    CONSTRAINT pk_category PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS menu
 (
    id            INT AUTO_INCREMENT NOT NULL,
-   category_id   INT                NOT NULL,
+   category_id   INT                 NOT NULL,
    `description` VARCHAR(300)       NOT NULL,
-   name          VARCHAR(100)       NOT NULL,
+   name          VARCHAR(100)  COLLATE utf8mb4_bin NOT NULL,
    price         INT                NOT NULL,
    available     BIT(1)             NOT NULL,
    CONSTRAINT pk_menu PRIMARY KEY (id)
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS menu
 CREATE TABLE IF NOT EXISTS orders
 (
    id            BIGINT AUTO_INCREMENT NOT NULL,
-   email         VARCHAR(100)          NOT NULL,
+   email         VARCHAR(100) COLLATE utf8mb4_bin  NOT NULL,
    created_at    datetime(6)           NOT NULL,
    status        VARCHAR(16)           NOT NULL,
    address       VARCHAR(200)          NOT NULL,
@@ -203,22 +203,22 @@ ALTER TABLE order_items
 | A03    | `⏳ 대기중` | 카테고리 등록    | POST    | -               |
 | A04    | `⏳ 대기중` | 카테고리 수정    | PUT     | -               |
 | A05    | `⏳ 대기중` | 카테고리 삭제    | DELETE  | -               |
-| A06    | `⏳ 대기중` | 전체 메뉴      | GET     | -               |
-| A07    | `⏳ 대기중` | 메뉴 상세      | GET     | -               |
-| A08    | `⏳ 대기중` | 메뉴 등록      | POST    | -               |
-| A09    | `⏳ 대기중` | 메뉴 일반 수정   | PUT     | -               |
-| A10    | `⏳ 대기중` | 메뉴 삭제      | DELETE  | -               |
+| A06    | `✅ 완료` | 전체 메뉴      | GET     | -               |
+| A07    | `✅ 완료` | 메뉴 상세      | GET     | -               |
+| A08    | `✅ 완료` | 메뉴 등록      | POST    | -               |
+| A09    | `✅ 완료` | 메뉴 일반 수정   | PUT     | -               |
+| A10    | `✅ 완료` | 메뉴 삭제      | DELETE  | -               |
 | A11    | `✅ 완료` | 주문 접수      | POST    | -               |
 | A12    | `✅ 완료` | 이메일별 주문    | GET     | -               |
 | A13    | `✅ 완료` | 주문 상세      | GET     | -               |
 | A14    | `✅ 완료` | 배송 묶음      | GET     | -               |
-| A15    | `⏳ 대기중` | 카테고리별 메뉴   | GET     | -               |
+| A15    | `✅ 완료` | 카테고리별 메뉴   | GET     | -               |
 | A16    | `✅ 완료` | 주문 취소      | POST    | -               |
 | A17    | `✅ 완료` | 접수일별 주문 통계 | GET     | -               |
 | A18    | `✅ 완료` | 접수일별 메뉴 통계 | GET     | -               |
-| A19    | `⏳ 대기중` | 판매 중 메뉴    | GET     | -               |
-| A20    | `⏳ 대기중` | 메뉴명 검색     | GET     | -               |
-| A21    | `⏳ 대기중` | 판매 여부 변경   | PUT     | -               |
+| A19    | `✅ 완료` | 판매 중 메뉴    | GET     | -               |
+| A20    | `✅ 완료` | 메뉴명 검색     | GET     | -               |
+| A21    | `✅ 완료` | 판매 여부 변경   | PUT     | -               |
 | A22    | `✅ 완료` | 주문 메모 수정   | PUT     | -               |
 | A23    | `✅ 완료` | 재주문        | POST    | -               |
 | A24    | `✅ 완료` | 접수일별 고객 통계 | GET     | -               |
