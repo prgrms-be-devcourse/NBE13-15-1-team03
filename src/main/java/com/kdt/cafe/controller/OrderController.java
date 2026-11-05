@@ -2,6 +2,7 @@ package com.kdt.cafe.controller;
 
 import com.kdt.cafe.dto.*;
 import com.kdt.cafe.service.OrderService;
+import jakarta.validation.Valid;
 import jakarta.persistence.GeneratedValue;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class OrderController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<OrderSummary>> searchOrderList(OrderListRequestDTO dto){
+    public ResponseEntity<List<OrderSummary>> searchOrderList(@Valid OrderListRequestDTO dto){
         return ResponseEntity.ok(orderService.getOrdersByEmail(dto));
     }
 

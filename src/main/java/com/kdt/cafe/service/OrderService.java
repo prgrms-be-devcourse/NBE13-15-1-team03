@@ -4,6 +4,7 @@ import com.kdt.cafe.dto.*;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.entity.Order;
 import com.kdt.cafe.entity.OrderItem;
+import com.kdt.cafe.entity.OrderStatus;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.MenuRepository;
@@ -16,9 +17,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,8 +26,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
-
-    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
@@ -58,7 +56,7 @@ public class OrderService {
         }
 
         // 5. 현재 시각 구하고, 배송일 계산
-        LocalDateTime nowTime = LocalDateTime.now(SEOUL);
+        LocalDateTime nowTime = now();
         LocalDate shippingDate = calculateShippingDate(nowTime);
 
         // 6. Order 만들고, 항목마다 OrderItem 만들어서 추가
@@ -108,7 +106,13 @@ public class OrderService {
         this.menuRepository = menuRepository;
     }
 
-    @Transactional
+    // 현재 시각은 항상 여기서만 구함 → 접수 시각·배송일·취소 시각이 같은 기준
+    // 서울 기준, 초 단위로 자름(밀리초 이하 제거)
+    private LocalDateTime now() {
+        return LocalDateTime.now(Order.ZONE).truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    @Transactional(readOnly = true)
     public List<OrderSummary> getOrdersByEmail(OrderListRequestDTO dto){
         List<Order> orders = orderRepository.findByEmail(dto.email());
         return orders.stream()
@@ -125,8 +129,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDTO cancelOrder(Long orderId){
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessLogicException(ErrorCode.ORDER_NOT_FOUND));
-        LocalDateTime now = LocalDateTime.now(SEOUL);
-        order.cancel(now);
+        order.cancel(now());
         return OrderResponseDTO.from(order);
     }
 

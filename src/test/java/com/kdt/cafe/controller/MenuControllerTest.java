@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,11 +37,6 @@ class MenuControllerTest {
 
     @MockitoBean
     private MenuService menuService;
-
-    // CafeApplication의 @EnableJpaAuditing 때문에 @WebMvcTest가 JPA 정보를 찾음
-    // JpaAuditingConfig로 옮기기 전까지 임시로 가짜 객체 등록
-    @MockitoBean
-    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
 
     // ===== A06 전체 메뉴 =====
