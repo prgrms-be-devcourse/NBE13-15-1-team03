@@ -1,7 +1,7 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.MenuResponseDTO;
+import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.exception.BusinessLogicException;
@@ -9,6 +9,7 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderItemRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

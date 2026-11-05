@@ -1,13 +1,12 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.CategoryRequestDTO;
-import com.kdt.cafe.dto.CategoryResponseDTO;
+import com.kdt.cafe.dto.category.CategoryRequestDTO;
+import com.kdt.cafe.dto.category.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;

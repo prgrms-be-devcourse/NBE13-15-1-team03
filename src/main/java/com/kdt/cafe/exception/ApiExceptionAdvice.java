@@ -1,6 +1,7 @@
 package com.kdt.cafe.exception;
 
-import com.kdt.cafe.dto.ApiError;
+import com.kdt.cafe.dto.common.ApiError;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;

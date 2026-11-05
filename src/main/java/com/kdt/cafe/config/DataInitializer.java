@@ -1,11 +1,12 @@
 package com.kdt.cafe.config;
 
-import com.kdt.cafe.dto.CategoryRequestDTO;
-import com.kdt.cafe.dto.CategoryResponseDTO;
-import com.kdt.cafe.dto.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.MenuResponseDTO;
+import com.kdt.cafe.dto.category.CategoryRequestDTO;
+import com.kdt.cafe.dto.category.CategoryResponseDTO;
+import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuResponseDTO;
 import com.kdt.cafe.service.CategoryService;
 import com.kdt.cafe.service.MenuService;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;

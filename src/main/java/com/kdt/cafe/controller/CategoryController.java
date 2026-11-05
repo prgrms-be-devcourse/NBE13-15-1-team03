@@ -1,8 +1,9 @@
 package com.kdt.cafe.controller;
 
-import com.kdt.cafe.dto.CategoryRequestDTO;
-import com.kdt.cafe.dto.CategoryResponseDTO;
+import com.kdt.cafe.dto.category.CategoryRequestDTO;
+import com.kdt.cafe.dto.category.CategoryResponseDTO;
 import com.kdt.cafe.service.CategoryService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

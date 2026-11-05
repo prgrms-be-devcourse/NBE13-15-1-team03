@@ -1,7 +1,7 @@
 package com.kdt.cafe.controller;
 
-import com.kdt.cafe.dto.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.MenuResponseDTO;
+import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuResponseDTO;
 import com.kdt.cafe.service.MenuService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +19,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /*
  * 실제 MenuController + 모의 MenuService + MockMvc
