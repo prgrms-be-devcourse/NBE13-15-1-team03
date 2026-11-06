@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
 
@@ -75,7 +76,7 @@ public class ApiExceptionAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpectedException(Exception e) {
-        //예상 못 한 예외가 로그 없이 사라져서 원인을 못 찾는 문제가 있어 log.error 추가했습니다.
+        // 예상하지 못한 예외: 응답에는 내부 정보를 숨기고, 원인 추적을 위해 서버 로그에는 전체 스택 트레이스를 남김
         log.error("정의되지 않은 예외 발생", e);
 
         ApiError response = new ApiError(
@@ -86,5 +87,12 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(ErrorCode.UNDEFINED_ERROR.getStatus())
                 .body(response);
+    }
+
+    // 존재하지 않는 정적 리소스 요청(예: 브라우저가 자동으로 보내는 /favicon.ico)은
+    // 서버 오류가 아니므로 에러 로그 없이 404로 응답
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResource(NoResourceFoundException e) {
+        return ResponseEntity.notFound().build();
     }
 }
