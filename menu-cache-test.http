@@ -1,0 +1,29 @@
+### 1. 판매 중 메뉴 조회 (캐시 확인용)
+GET http://localhost:8080/api/v1/menus/available
+
+### 2. 판매 중지
+PUT http://localhost:8080/api/v1/menus/1/availability
+Content-Type: application/json
+
+{ "available": false }
+
+### 3. 판매 재개
+PUT http://localhost:8080/api/v1/menus/1/availability
+Content-Type: application/json
+
+{ "available": true }
+
+### 4. 메뉴 등록
+POST http://localhost:8080/api/v1/menus
+Content-Type: application/json
+
+{ "categoryId": 1, "name": "캐시 테스트 메뉴", "price": 4500, "description": "테스트용" }
+
+### 5. 메뉴 수정 (이름·가격·카테고리)
+PUT http://localhost:8080/api/v1/menus/1
+Content-Type: application/json
+
+{ "categoryId": 1, "name": "이름 바꿈", "price": 9999, "description": "수정 테스트" }
+
+### 6. 메뉴 삭제 (주문 이력 없는 메뉴 id로)
+DELETE http://localhost:8080/api/v1/menus/999
