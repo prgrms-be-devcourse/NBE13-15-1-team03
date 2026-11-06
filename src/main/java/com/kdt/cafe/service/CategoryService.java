@@ -6,6 +6,7 @@ import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
+import com.kdt.cafe.repository.MenuRepository;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,10 @@ import java.util.List;
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
-    public CategoryService(CategoryRepository categoryRepository) {
+    private final MenuRepository menuRepository;
+    public CategoryService(CategoryRepository categoryRepository, MenuRepository menuRepository) {
         this.categoryRepository = categoryRepository;
+        this.menuRepository = menuRepository;
     }
     //필요 한 매서드 종류
 
@@ -76,6 +79,10 @@ public class CategoryService {
         validateId(id);
         if (!categoryRepository.existsById(id)){
             throw new BusinessLogicException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+        // 소속 메뉴가 하나라도 있으면 삭제 불가 (409 CATEGORY_IN_USE)
+        if (menuRepository.existsByCategory_Id(id)){
+            throw new BusinessLogicException(ErrorCode.CATEGORY_IN_USE);
         }
         categoryRepository.deleteById(id);
     }
