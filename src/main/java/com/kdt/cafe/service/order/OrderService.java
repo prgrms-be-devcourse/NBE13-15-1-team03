@@ -84,9 +84,6 @@ public class OrderService {
         List<Order> placedOrders = orderRepository.findByEmailAndShippingDateAndStatus(email, shippingDate, OrderStatus.PLACED);
 
         for (Order placed : placedOrders) {
-            if (!placed.getEmail().equals(email)) {
-                continue;
-            }
             // 앞뒤 공백 제거 후 비교, 중간 표기·대소문자는 그대로 비교
             boolean sameAddress = placed.getAddress().strip().equals(address.strip());
             boolean samePostcode = placed.getPostcode().strip().equals(postcode.strip());
@@ -125,8 +122,6 @@ public class OrderService {
     public List<OrderSummary> getOrdersByEmail(OrderListRequestDTO dto){
         List<Order> orders = orderRepository.findByEmailOrderByCreatedAtDescIdDesc(dto.email());
         return orders.stream()
-                // MySQL 기본 정렬 규칙은 대소문자를 구분하지 않으므로 이메일은 자바에서 한 번 더 비교
-                .filter(order -> order.getEmail().equals(dto.email()))
                 .map(OrderSummary::from)
                 .toList();
     }

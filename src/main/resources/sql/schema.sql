@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS category
 CREATE TABLE IF NOT EXISTS menu
 (
     id            INT AUTO_INCREMENT NOT NULL,
-    category_id   INT   COLLATE utf8mb4_bin  NOT NULL,
+    category_id   INT                NOT NULL,
     `description` VARCHAR(300)       NOT NULL,
-    name          VARCHAR(100)       NOT NULL,
+    name          VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
     price         INT                NOT NULL,
     available     BIT(1)             NOT NULL,
     CONSTRAINT pk_menu PRIMARY KEY (id)
