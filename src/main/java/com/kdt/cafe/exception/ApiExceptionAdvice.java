@@ -1,7 +1,6 @@
 package com.kdt.cafe.exception;
 
 import com.kdt.cafe.dto.common.ApiError;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
@@ -36,7 +34,9 @@ public class ApiExceptionAdvice {
     public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException e) {
         Map<String, String> fieldErrors = new HashMap<>();
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-            fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            // 중첩 필드(items[0].quantity 등)는 명세의 필드 이름인 최상위 이름(items)으로 보고
+            String field = fieldError.getField().split("[.\\[]")[0];
+            fieldErrors.putIfAbsent(field, fieldError.getDefaultMessage());
         }
 
         ApiError response = new ApiError(ErrorCode.VALIDATION_ERROR.name(), ErrorCode.VALIDATION_ERROR.getMessage(), fieldErrors);
@@ -77,8 +77,9 @@ public class ApiExceptionAdvice {
         Map<String, String> fieldErrors = new HashMap<>();
         for (ParameterValidationResult result : e.getParameterValidationResults()) {
             String name = result.getMethodParameter().getParameterName();
-            String message = result.getResolvableErrors().getFirst().getDefaultMessage();
-            fieldErrors.put(name, message);
+            for (MessageSourceResolvable error : result.getResolvableErrors()) {
+                fieldErrors.put(name, error.getDefaultMessage());
+            }
         }
         return validationError(fieldErrors);
     }
@@ -104,18 +105,4 @@ public class ApiExceptionAdvice {
                 .status(ErrorCode.UNDEFINED_ERROR.getStatus())
                 .body(response);
     }
-
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiError> handleMethodValidationException(HandlerMethodValidationException e) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        for (ParameterValidationResult result : e.getParameterValidationResults()) {
-            String name = result.getMethodParameter().getParameterName();
-            for (MessageSourceResolvable error : result.getResolvableErrors()) {
-                fieldErrors.put(name, error.getDefaultMessage());
-            }
-        }
-        return validationError(fieldErrors);
-    }
 }
-
-

@@ -1,6 +1,7 @@
 package com.kdt.cafe.service;
 
 import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
+import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
 import com.kdt.cafe.dto.menu.MenuResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
@@ -9,26 +10,19 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderItemRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-
-import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import java.util.List;
 
 class MenuServiceTest {
     private MenuRepository menuRepository;

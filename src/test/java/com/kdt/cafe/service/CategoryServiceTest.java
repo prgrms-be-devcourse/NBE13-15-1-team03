@@ -5,6 +5,7 @@ import com.kdt.cafe.dto.category.CategoryResponseDTO;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.exception.BusinessLogicException;
 import com.kdt.cafe.repository.CategoryRepository;
+import com.kdt.cafe.repository.MenuRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
@@ -27,7 +28,7 @@ class CategoryServiceTest {
     void setUp() {
 
         categoryRepository = mock(CategoryRepository.class);
-        categoryService = new CategoryService(categoryRepository);
+        categoryService = new CategoryService(categoryRepository, mock(MenuRepository.class));
     }
 
     @Test

@@ -26,7 +26,7 @@ public record OrderCreateRequestDTO(
         @NotNull(message = "주문 항목은 필수입니다.")
         @Size(min = 1, max = 10, message = "주문 항목은 1개 이상 10개 이하여야 합니다.")
         @UniqueMenuIds(message = "같은 메뉴를 중복해서 주문할 수 없습니다.")
-        List<@Valid OrderItemRequestDTO> items
+        List<@NotNull(message = "주문 항목에 빈 값(null)이 있습니다.") @Valid OrderItemRequestDTO> items
 ) {
         // 주소, 우편번호의 앞뒤 공백 제거
         public OrderCreateRequestDTO{

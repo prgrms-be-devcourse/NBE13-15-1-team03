@@ -8,17 +8,14 @@ import com.kdt.cafe.exception.ErrorCode;
 import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderItemRepository;
-
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.ArrayList;
 import java.util.List;
