@@ -8,6 +8,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
@@ -62,6 +64,19 @@ public class ApiExceptionAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return validationError(Map.of(e.getName(), "자료형을 확인해 주세요."));
+    }
+
+    // 경로·쿼리 파라미터에 붙인 검증 어노테이션(@Positive 등) 위반 (예: /api/v1/reference/posts/0)
+    // 파라미터 이름(postId 등)이 그대로 fieldErrors 이름이 됨
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiError> handleMethodValidationException(HandlerMethodValidationException e) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (ParameterValidationResult result : e.getParameterValidationResults()) {
+            String name = result.getMethodParameter().getParameterName();
+            String message = result.getResolvableErrors().getFirst().getDefaultMessage();
+            fieldErrors.put(name, message);
+        }
+        return validationError(fieldErrors);
     }
 
     private ResponseEntity<ApiError> validationError(Map<String, String> fieldErrors) {

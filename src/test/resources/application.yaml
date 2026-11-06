@@ -13,3 +13,10 @@ spring:
     hibernate:
       # 시작할 때 엔티티 기준으로 테이블을 만들고, 끝날 때 지움
       ddl-auto: create-drop
+# 외부 게시글 조회(RestClient) 주소
+# - @SpringBootTest가 RestClientConfig 빈을 만들 때 필요한 값 (실제 호출하는 테스트는 없음)
+# - 실수로 호출되면 진짜 외부 서버 대신 바로 연결 실패하도록 로컬의 닫힌 주소를 넣어 둠
+# - ReferenceControllerTest는 @DynamicPropertySource로 모의 서버 주소로 바꿔서 사용
+cafe:
+  outside:
+    base-url: http://127.0.0.1:1

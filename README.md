@@ -204,6 +204,52 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 ./gradlew test --tests "com.kdt.cafe.service.order.OrderPersistenceTest" --rerun-tasks
 ```
 
+**[선택 심화] RestClient 외부 조회·실패 처리**
+
+`GET /api/v1/reference/posts/{postId}` → 실제 RestClient로 외부 서버의 `/posts/{postId}`를 GET 호출하고 `id`·`userId`·`title`·`body`를 반환합니다. 제공 화면에는 연결하지 않습니다.
+
+| 구분 | 위치 |
+| --- | --- |
+| 컨트롤러 | `src/main/java/com/kdt/cafe/controller/ReferenceController.java` |
+| 서비스 (외부 호출·오류 변환) | `src/main/java/com/kdt/cafe/service/ReferenceService.java` |
+| RestClient 설정 (주소·타임아웃) | `src/main/java/com/kdt/cafe/config/RestClientConfig.java` |
+| 테스트 | `src/test/java/com/kdt/cafe/controller/ReferenceControllerTest.java` |
+
+외부 주소 설정
+
+- 설정 키: `cafe.outside.base-url` (`src/main/resources/application.yaml`)
+- 기본값: `https://jsonplaceholder.typicode.com`
+- 바꾸는 방법: 환경변수 또는 `.env`에 `REST_URL` 지정 (예: `REST_URL=http://127.0.0.1:9000`)
+
+타임아웃: 연결 대기 최대 3초, 연결 후 응답 읽기 대기 최대 5초 (`RestClientConfig`)
+
+| 요청·외부 결과 | 상태 | code |
+| --- | --- | --- |
+| 성공 | 200 | - (외부 응답의 `id`·`userId`·`title`·`body`) |
+| `postId`가 1 이상의 정수가 아님 | 400 | `VALIDATION_ERROR` (`fieldErrors.postId`) |
+| 외부 404 | 404 | `REFERENCE_POST_NOT_FOUND` |
+| 외부 500~599, 연결 거절, 도메인 오류 | 502 | `OUTSIDE_API_FAILED` |
+| 연결 또는 응답 읽기 시간 초과 | 504 | `OUTSIDE_API_TIMEOUT` |
+
+테스트 방법
+
+- 실제 외부 서비스(jsonplaceholder)는 호출하지 않습니다. 테스트 안에서 모의 외부 서버를 띄우고, `@DynamicPropertySource`로 `cafe.outside.base-url`을 그 주소로 바꿉니다.
+- MockMvc로 우리 API를 호출하면 Controller → Service → 실제 RestClient(타임아웃 3초·5초) → 모의 서버 순서로 실행됩니다. 외부 서버만 가짜이고 나머지는 실제 코드입니다.
+- 오류 응답은 상태·`code`·`message`와 `fieldErrors={}`까지 확인합니다.
+
+| 사례 | 모의 외부 서버 구성 | 기대 결과 |
+| --- | --- | --- |
+| 성공 | 요청한 postId를 담은 JSON을 200으로 응답 | 200, 요청한 postId의 값 그대로 |
+| 외부 404 | 404 응답 | 404 `REFERENCE_POST_NOT_FOUND` |
+| 외부 서버 오류 | 500 응답 | 502 `OUTSIDE_API_FAILED` |
+| 연결 실패 | 아무도 듣지 않는 포트 (연결 거절) | 502 `OUTSIDE_API_FAILED` |
+| 연결 시간 초과 | 대기열이 꽉 찬 소켓 (연결 요청에 응답하지 않음) | 3초 후 504 `OUTSIDE_API_TIMEOUT` |
+| 응답 읽기 시간 초과 | 7초 뒤에 응답 | 5초 후 504 `OUTSIDE_API_TIMEOUT` |
+
+```bash
+./gradlew test --tests "com.kdt.cafe.controller.ReferenceControllerTest"
+```
+
 
 **기술 스택**
 
@@ -259,4 +305,5 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 | 정예나 | 업무 규칙 자동 테스트 | (작성 예정) | (작성 예정) |
 | 변광준 | 별도 메뉴 페이징 API | (작성 예정) | (작성 예정) |
 | 표한결 | Redis 메뉴 조회 캐시 | (작성 예정) | (작성 예정) |
-| 허우솔 | 실제 DB 저장·롤백 테스트 | (작성 예정) | (작성 예정) |
+| 허우솔 | 실제 DB 저장·롤백 테스트 | 테스트 `service/order/OrderPersistenceTest`, 테스트 DB 설정 `src/test/resources/application.yaml` (H2), 검증 대상 `OrderService.createOrder` (`@Transactional`) | `OrderPersistenceTest` (위 "[선택 심화] 실제 DB 저장·롤백 테스트" 참고) |
+| 허우솔 | RestClient 외부 조회·실패 처리 | `controller/ReferenceController`, `service/ReferenceService`, `config/RestClientConfig` | `ReferenceControllerTest` (위 "[선택 심화] RestClient 외부 조회·실패 처리" 참고) |
