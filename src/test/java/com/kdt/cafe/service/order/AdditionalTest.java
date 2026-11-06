@@ -111,6 +111,8 @@ public class AdditionalTest {
 
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         assertEquals(firstCancel, order.getCancelledAt());
+        assertEquals(List.of(BUYER,ADDRESS,POSTCODE, LocalDate.of(2026,11,7)),
+                List.of(order.getEmail(),order.getAddress(),order.getPostcode(),order.getShippingDate()));
     }
 
     //재주문 잘 되는지
