@@ -80,6 +80,4 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
-    //카테고리 별 메뉴 조회
-//    public
 }
