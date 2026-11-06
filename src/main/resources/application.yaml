@@ -10,6 +10,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+
+cafe:
+  outside:
+    base-url: ${REST_URL:https://jsonplaceholder.typicode.com}
     show-sql: true # 캐시가 유효한 동안 DB를 재조회하지 않는다를 보여주기 위함.
 
   data:

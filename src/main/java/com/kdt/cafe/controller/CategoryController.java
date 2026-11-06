@@ -55,8 +55,4 @@ public class CategoryController {
         categoryService.delete(categoryId);
     }
 
-//    @GetMapping("/{categoryId}/menus")
-//    public List<Menu> getMenusByCategory(@PathVariable("categoryId") int categoryId) {
-//        return
-//    }
 }
