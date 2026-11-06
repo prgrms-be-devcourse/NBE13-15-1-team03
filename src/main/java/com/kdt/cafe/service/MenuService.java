@@ -1,9 +1,6 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.menu.MenuAvailabilityUpdateRequestDTO;
-import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.menu.MenuResponseDTO;
-import com.kdt.cafe.dto.menu.MenuUpdateRequestDTO;
+import com.kdt.cafe.dto.menu.*;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.exception.BusinessLogicException;
@@ -12,8 +9,16 @@ import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderItemRepository;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +36,7 @@ public class MenuService {
         this.orderItemRepository = orderItemRepository;
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO create(MenuCreateRequestDTO request) {
         Category category = this.categoryRepository.findById(request.categoryId())
@@ -67,6 +73,7 @@ public class MenuService {
         return MenuResponseDTO.from(menu);
     }
 
+    @Cacheable(cacheNames = "availableMenus", key = "'all'")
     @Transactional(readOnly = true)
     public List<MenuResponseDTO> findAvailable() {
         return toResponses(this.menuRepository.findByAvailableTrueOrderByIdAsc());
@@ -81,6 +88,7 @@ public class MenuService {
         return toResponses(this.menuRepository.findByCategory_IdOrderByIdAsc(categoryId));
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO update(Integer menuId, MenuUpdateRequestDTO request) {
         Menu menu = this.findMenu(menuId);
@@ -91,6 +99,7 @@ public class MenuService {
 
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO changeAvailability(Integer menuId, MenuAvailabilityUpdateRequestDTO request) {
         Menu menu = this.findMenu(menuId);
@@ -107,6 +116,7 @@ public class MenuService {
         return toResponses(this.menuRepository.findByNameContainingOrderByIdAsc(keyword.strip()));
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public void delete(Integer menuId) {
         Menu menu = this.findMenu(menuId);
@@ -115,6 +125,13 @@ public class MenuService {
         }
         this.menuRepository.delete(menu);
    }
+
+    @Transactional(readOnly = true)
+    public MenuPageResponseDTO findPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<Menu> result = this.menuRepository.findAll(pageable);
+        return MenuPageResponseDTO.from(result);
+    }
 
 
 

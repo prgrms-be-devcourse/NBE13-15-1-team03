@@ -2,9 +2,12 @@ package com.kdt.cafe.exception;
 
 import com.kdt.cafe.dto.common.ApiError;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionAdvice {
 
@@ -88,6 +92,9 @@ public class ApiExceptionAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpectedException(Exception e) {
+        // 예상하지 못한 예외: 응답에는 내부 정보를 숨기고, 원인 추적을 위해 서버 로그에는 전체 스택 트레이스를 남김
+        log.error("정의되지 않은 예외 발생", e);
+
         ApiError response = new ApiError(
                 ErrorCode.UNDEFINED_ERROR.name(),
                 ErrorCode.UNDEFINED_ERROR.getMessage(),
@@ -97,4 +104,18 @@ public class ApiExceptionAdvice {
                 .status(ErrorCode.UNDEFINED_ERROR.getStatus())
                 .body(response);
     }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiError> handleMethodValidationException(HandlerMethodValidationException e) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (ParameterValidationResult result : e.getParameterValidationResults()) {
+            String name = result.getMethodParameter().getParameterName();
+            for (MessageSourceResolvable error : result.getResolvableErrors()) {
+                fieldErrors.put(name, error.getDefaultMessage());
+            }
+        }
+        return validationError(fieldErrors);
+    }
 }
+
+
