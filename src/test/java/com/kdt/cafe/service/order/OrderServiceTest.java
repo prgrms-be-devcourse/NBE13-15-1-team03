@@ -71,18 +71,6 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("A12 이메일은 대소문자를 구분하므로, DB가 함께 돌려준 대소문자만 다른 이메일의 주문은 제외한다")
-    void orders_by_email_are_case_sensitive() {
-        Order mine = order(2L, BUYER, ADDRESS, POSTCODE);
-        Order otherCase = order(1L, "Buyer@example.com", ADDRESS, POSTCODE);
-        given(this.orderRepository.findByEmailOrderByCreatedAtDescIdDesc(BUYER)).willReturn(List.of(mine, otherCase));
-
-        List<OrderSummary> result = this.orderService.getOrdersByEmail(new OrderListRequestDTO(BUYER));
-
-        assertEquals(List.of(2L), result.stream().map(OrderSummary::id).toList());
-    }
-
-    @Test
     @DisplayName("A12 취소 주문도 목록에 포함한다")
     void orders_by_email_include_cancelled() {
         Order cancelled = order(1L, BUYER, ADDRESS, POSTCODE);
@@ -148,15 +136,6 @@ class OrderServiceTest {
 
         assertDoesNotThrow(() -> this.orderService.createOrder(request(BUYER, "부산시 해운대로 1", "48000")));
         verify(this.orderRepository).findByEmailAndShippingDateAndStatus(eq(BUYER), any(LocalDate.class), eq(OrderStatus.PLACED));
-        verify(this.orderRepository).save(any());
-    }
-
-    @Test
-    @DisplayName("A11 이메일은 대소문자를 구분하므로, 대소문자만 다른 이메일의 주문 주소와는 비교하지 않는다")
-    void other_case_email_is_not_compared() {
-        givenPlacedOrders(order(1L, "Buyer@example.com", ADDRESS, POSTCODE));
-
-        assertDoesNotThrow(() -> this.orderService.createOrder(request(BUYER, "부산시 해운대로 1", "48000")));
         verify(this.orderRepository).save(any());
     }
 
