@@ -111,7 +111,7 @@ class OrderPersistenceTest {
     }
 
     private OrderCreateRequestDTO request() {
-        return new OrderCreateRequestDTO(EMAIL, "서울시 실습로 10 101호", "01234", List.of(
+        return new OrderCreateRequestDTO(EMAIL, "서울시 땡땡로 10 101호", "01234", List.of(
                 new OrderItemRequestDTO(columbia.getId(), 2),
                 new OrderItemRequestDTO(brazil.getId(), 1)));
     }
