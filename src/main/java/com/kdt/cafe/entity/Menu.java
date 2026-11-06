@@ -21,7 +21,6 @@ public class Menu {
     @Column(nullable = false, length = 100)
     private String name;
 
-
     @Column(nullable = false)
     private int price;
 
