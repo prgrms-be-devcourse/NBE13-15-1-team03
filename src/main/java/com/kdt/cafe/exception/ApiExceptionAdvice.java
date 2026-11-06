@@ -10,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
 
@@ -87,12 +86,5 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(ErrorCode.UNDEFINED_ERROR.getStatus())
                 .body(response);
-    }
-
-    // 존재하지 않는 정적 리소스 요청(예: 브라우저가 자동으로 보내는 /favicon.ico)은
-    // 서버 오류가 아니므로 에러 로그 없이 404로 응답
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Void> handleNoResource(NoResourceFoundException e) {
-        return ResponseEntity.notFound().build();
     }
 }
