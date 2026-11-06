@@ -256,7 +256,7 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 
 | 담당 | 심화 | 코드 위치 | 검증 방법 |
 | --- | --- | --- | --- |
-| 정예나 | 업무 규칙 자동 테스트 | (작성 예정) | (작성 예정) |
+| 정예나 | 업무 규칙 자동 테스트 | (`src/test/java/com/kdt/cafe/service/order/AdditionalTest.java`) | (./gradlew test --tests “com.kdt.cafe.service.order.AdditionalTest”) |
 | 변광준 | 별도 메뉴 페이징 API | (작성 예정) | (작성 예정) |
 | 표한결 | Redis 메뉴 조회 캐시 | (작성 예정) | (작성 예정) |
 | 허우솔 | 실제 DB 저장·롤백 테스트 | (작성 예정) | (작성 예정) |
