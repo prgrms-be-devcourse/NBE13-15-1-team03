@@ -2,6 +2,7 @@ package com.kdt.cafe.exception;
 
 import com.kdt.cafe.dto.common.ApiError;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionAdvice {
 
@@ -73,6 +75,9 @@ public class ApiExceptionAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpectedException(Exception e) {
+        //예상 못 한 예외가 로그 없이 사라져서 원인을 못 찾는 문제가 있어 log.error 추가했습니다.
+        log.error("정의되지 않은 예외 발생", e);
+
         ApiError response = new ApiError(
                 ErrorCode.UNDEFINED_ERROR.name(),
                 ErrorCode.UNDEFINED_ERROR.getMessage(),

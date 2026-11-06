@@ -243,5 +243,5 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 | --- | --- | --- | --- |
 | 정예나 | 업무 규칙 자동 테스트 | (작성 예정) | (작성 예정) |
 | 변광준 | 별도 메뉴 페이징 API | (작성 예정) | (작성 예정) |
-| 표한결 | Redis 메뉴 조회 캐시 | (작성 예정) | (작성 예정) |
+| 표한결 | Redis 메뉴 조회 캐시 | `config/CacheConfig.java`<br>`service/MenuService.java`<br>(`findAvailable` 캐시, `create`·`update`·`delete`·`changeAvailability` 무효화) | `redis-cli`에서 `GET`·`TTL availableMenus::all`로 키·값·남은 만료 시간 확인<br>SQL 로그로 캐시 유효 중 DB 재조회 없음 확인<br>등록·수정·삭제·판매 상태 변경 후 키 삭제 및 첫 조회 반영 확인<br>[상세 설명](#redis-메뉴-조회-캐시) |
 | 허우솔 | 실제 DB 저장·롤백 테스트 | (작성 예정) | (작성 예정) |

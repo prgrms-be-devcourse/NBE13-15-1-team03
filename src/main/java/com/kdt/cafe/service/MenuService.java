@@ -12,6 +12,8 @@ import com.kdt.cafe.repository.CategoryRepository;
 import com.kdt.cafe.repository.MenuRepository;
 import com.kdt.cafe.repository.OrderItemRepository;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class MenuService {
         this.orderItemRepository = orderItemRepository;
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO create(MenuCreateRequestDTO request) {
         Category category = this.categoryRepository.findById(request.categoryId())
@@ -67,6 +70,7 @@ public class MenuService {
         return MenuResponseDTO.from(menu);
     }
 
+    @Cacheable(cacheNames = "availableMenus", key = "'all'")
     @Transactional(readOnly = true)
     public List<MenuResponseDTO> findAvailable() {
         return toResponses(this.menuRepository.findByAvailableTrueOrderByIdAsc());
@@ -81,6 +85,7 @@ public class MenuService {
         return toResponses(this.menuRepository.findByCategory_IdOrderByIdAsc(categoryId));
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO update(Integer menuId, MenuUpdateRequestDTO request) {
         Menu menu = this.findMenu(menuId);
@@ -91,6 +96,7 @@ public class MenuService {
 
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public MenuResponseDTO changeAvailability(Integer menuId, MenuAvailabilityUpdateRequestDTO request) {
         Menu menu = this.findMenu(menuId);
@@ -107,6 +113,7 @@ public class MenuService {
         return toResponses(this.menuRepository.findByNameContainingOrderByIdAsc(keyword.strip()));
     }
 
+    @CacheEvict(cacheNames = "availableMenus", key = "'all'")
     @Transactional
     public void delete(Integer menuId) {
         Menu menu = this.findMenu(menuId);
