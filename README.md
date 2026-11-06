@@ -175,15 +175,15 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 
 | 규칙 | 메서드 | 확인하는 경계값 | 테스트 |
 | --- | --- | --- | --- |
-| 배송일 계산 | `Order.calculateShippingDate(접수 시각)` | 13:59:59 → 당일 / 14:00:00·14:00:01 → 다음 날 / 12-31 14:00:00 → 다음 해 01-01 | `entity/OrderTest` |
-| 취소 마감 | `order.cancel(현재 시각)` | 배송일 13:59:59 → 성공 / 14:00:00 → `ORDER_NOT_CANCELLABLE` | `entity/OrderTest` |
-| 재취소 | `order.cancel(현재 시각)` 두 번 | 마감 이후 재취소도 성공, 최초 `cancelledAt`·주문 값 유지 | `entity/OrderTest` |
+| 배송일 계산 | `Order.calculateShippingDate(접수 시각)` | 13:59:59 → 당일 / 14:00:00·14:00:01 → 다음 날 / 12-31 14:00:00 → 다음 해 01-01 | `entity/order/OrderTest` |
+| 취소 마감 | `order.cancel(현재 시각)` | 배송일 13:59:59 → 성공 / 14:00:00 → `ORDER_NOT_CANCELLABLE` | `entity/order/OrderTest` |
+| 재취소 | `order.cancel(현재 시각)` 두 번 | 마감 이후 재취소도 성공, 최초 `cancelledAt`·주문 값 유지 | `entity/order/OrderTest` |
 
 실행 명령
 
 ```bash
 # 시각 경계값·재취소 테스트만 실행
-./gradlew test --tests "com.kdt.cafe.entity.OrderTest"
+./gradlew test --tests "com.kdt.cafe.entity.order.OrderTest"
 
 # 전체 테스트 실행
 ./gradlew test
