@@ -22,6 +22,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import java.util.List;
+
 class MenuServiceTest {
     private MenuRepository menuRepository;
     private CategoryRepository categoryRepository;
@@ -93,5 +101,43 @@ class MenuServiceTest {
         this.menuService.delete(1);
 
         verify(this.menuRepository).delete(menu);                         // 찾아온 그 메뉴를 삭제했는지
+    }
+
+    @Test
+    @DisplayName("심화 페이징: 요청한 page·size와 ID 오름차순 정렬로 조회한다")
+    void findPage_requests_page_with_id_ascending() {
+        given(this.menuRepository.findAll(any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(), PageRequest.of(1, 2), 0));
+
+        this.menuService.findPage(1, 2);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(this.menuRepository).findAll(captor.capture());
+        Pageable pageable = captor.getValue();
+        assertEquals(1, pageable.getPageNumber());                 // 요청한 페이지 번호
+        assertEquals(2, pageable.getPageSize());                   // 요청한 페이지 크기
+        assertEquals(Sort.Direction.ASC,
+                pageable.getSort().getOrderFor("id").getDirection());   // ID 오름차순
+    }
+
+    @Test
+    @DisplayName("심화 페이징: 조회 결과를 content·number·size·totalElements·totalPages로 변환한다")
+    void findPage_converts_page_to_response() {
+        Category category = mock(Category.class);
+        given(category.getId()).willReturn(1);
+        Menu menu1 = new Menu(category, "Columbia Nariñó", 5000, "설명1");
+        Menu menu2 = new Menu(category, "Ethiopia Sidamo", 11000, "설명2");
+        // 전체 5개 중 0페이지(2개씩)를 DB가 돌려줬다고 가정
+        Page<Menu> page = new PageImpl<>(List.of(menu1, menu2), PageRequest.of(0, 2), 5);
+        given(this.menuRepository.findAll(any(Pageable.class))).willReturn(page);
+
+        MenuPageResponseDTO response = this.menuService.findPage(0, 2);
+
+        assertEquals(2, response.content().size());
+        assertEquals("Columbia Nariñó", response.content().get(0).name());
+        assertEquals(0, response.number());
+        assertEquals(2, response.size());
+        assertEquals(5, response.totalElements());
+        assertEquals(3, response.totalPages());   // 5개를 2개씩 → 3페이지
     }
 }

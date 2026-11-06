@@ -1,9 +1,6 @@
 package com.kdt.cafe.service;
 
-import com.kdt.cafe.dto.menu.MenuAvailabilityUpdateRequestDTO;
-import com.kdt.cafe.dto.menu.MenuCreateRequestDTO;
-import com.kdt.cafe.dto.menu.MenuResponseDTO;
-import com.kdt.cafe.dto.menu.MenuUpdateRequestDTO;
+import com.kdt.cafe.dto.menu.*;
 import com.kdt.cafe.entity.Category;
 import com.kdt.cafe.entity.Menu;
 import com.kdt.cafe.exception.BusinessLogicException;
@@ -14,8 +11,14 @@ import com.kdt.cafe.repository.OrderItemRepository;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import com.kdt.cafe.dto.menu.MenuPageResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,6 +125,13 @@ public class MenuService {
         }
         this.menuRepository.delete(menu);
    }
+
+    @Transactional(readOnly = true)
+    public MenuPageResponseDTO findPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<Menu> result = this.menuRepository.findAll(pageable);
+        return MenuPageResponseDTO.from(result);
+    }
 
 
 

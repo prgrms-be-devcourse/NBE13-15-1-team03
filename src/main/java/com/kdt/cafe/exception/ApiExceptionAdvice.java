@@ -3,12 +3,15 @@ package com.kdt.cafe.exception;
 import com.kdt.cafe.dto.common.ApiError;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
@@ -87,4 +90,18 @@ public class ApiExceptionAdvice {
                 .status(ErrorCode.UNDEFINED_ERROR.getStatus())
                 .body(response);
     }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiError> handleMethodValidationException(HandlerMethodValidationException e) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (ParameterValidationResult result : e.getParameterValidationResults()) {
+            String name = result.getMethodParameter().getParameterName();
+            for (MessageSourceResolvable error : result.getResolvableErrors()) {
+                fieldErrors.put(name, error.getDefaultMessage());
+            }
+        }
+        return validationError(fieldErrors);
+    }
 }
+
+
