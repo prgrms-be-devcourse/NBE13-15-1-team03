@@ -21,8 +21,6 @@ public class Menu {
     @Column(nullable = false, length = 100)
     private String name;
 
-//    @Column(nullable = false)
-//    private int quantity;
 
     @Column(nullable = false)
     private int price;
@@ -39,7 +37,6 @@ public class Menu {
         this.category = category;
         this.description = description;
         this.name = name;
-//        this.quantity = quantity;
         this.price = price;
         this.available = true;
     }
@@ -51,10 +48,6 @@ public class Menu {
     public String getName() {
         return name;
     }
-
-//    public int getQuantity() {
-//        return quantity;
-//    }
 
     public int getPrice() {
         return price;

@@ -26,6 +26,12 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
 
+    @Autowired
+    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository) {
+        this.orderRepository = orderRepository;
+        this.menuRepository = menuRepository;
+    }
+
     @Transactional
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
         return placeOrder(request.email(), request.address(), request.postcode(), request.items());
@@ -104,12 +110,6 @@ public class OrderService {
                 .toList();
 
         return placeOrder(original.getEmail(), original.getAddress(), original.getPostcode(), items);
-    }
-
-    @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository) {
-        this.orderRepository = orderRepository;
-        this.menuRepository = menuRepository;
     }
 
     // 현재 시각은 항상 여기서만 구함 → 접수 시각·배송일·취소 시각이 같은 기준
