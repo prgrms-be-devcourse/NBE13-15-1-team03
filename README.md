@@ -189,6 +189,21 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 ./gradlew test
 ```
 
+**[선택 심화] 실제 DB 저장·롤백 테스트**
+
+- 테스트: `src/test/java/com/kdt/cafe/service/order/OrderPersistenceTest.java`
+- DB: H2 인메모리 (`src/test/resources/application.yaml`), 일반 실행용 MySQL·`.env`를 사용하지 않음
+- 실패 주입: 테스트에서 `OrderRepository.save`를 가로채(`@MockitoSpyBean`) 주문·항목을 실제로 INSERT한 뒤 예외를 던짐 (제품 API 변경 없음)
+
+| 테스트 | 확인 내용 |
+| --- | --- |
+| 정상 저장 | DB의 주문·항목 행에서 메뉴명·단가·수량·항목 금액·총액 확인 |
+| 롤백 | 주문 행·항목 INSERT 후 실패 → 주문·항목 수가 요청 전과 같고 해당 주문 행 없음 → 이어서 정상 주문 저장 |
+
+```bash
+./gradlew test --tests "com.kdt.cafe.service.order.OrderPersistenceTest" --rerun-tasks
+```
+
 
 **기술 스택**
 
