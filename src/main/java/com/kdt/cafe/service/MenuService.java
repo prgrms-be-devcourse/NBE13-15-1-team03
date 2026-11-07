@@ -106,11 +106,7 @@ public class MenuService {
 
     @Transactional (readOnly = true)
     public List<MenuResponseDTO> search(String keyword) {
-        if (keyword == null || keyword.strip().isEmpty() || keyword.strip().length() > 100){
-            throw new BusinessLogicException(ErrorCode.VALIDATION_ERROR,
-                    "keyword", "검색어는 앞뒤 공백을 제외하고 1~100자로 입력해 주세요.");
-        }
-        return toResponses(this.menuRepository.findByNameContainingOrderByIdAsc(keyword.strip()));
+        return toResponses(this.menuRepository.findByNameContainingOrderByIdAsc(keyword));
     }
 
     @CacheEvict(cacheNames = "availableMenus", key = "'all'")

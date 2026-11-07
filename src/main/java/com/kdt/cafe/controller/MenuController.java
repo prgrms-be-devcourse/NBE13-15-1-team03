@@ -47,8 +47,8 @@ public class MenuController {
     }
 
     @GetMapping("/search")
-    public List<MenuResponseDTO> search(@RequestParam(value = "keyword", required = false) String keyword) {
-        return this.menuService.search(keyword);
+    public List<MenuResponseDTO> search(@Valid MenuSearchRequestDTO request) {
+        return this.menuService.search(request.keyword());
     }
 
     @PutMapping("/{menuId}")
