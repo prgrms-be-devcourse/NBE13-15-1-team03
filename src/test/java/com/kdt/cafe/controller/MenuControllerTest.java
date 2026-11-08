@@ -78,7 +78,7 @@ class MenuControllerTest {
     // ===== A08 메뉴 등록 =====
 
     @Test
-    @DisplayName("A08 메뉴 등록은 201, Location 헤더, 새 메뉴 JSON을 반환하고 요청 값을 서비스에 그대로 전달한다")
+    @DisplayName("A08 메뉴 등록은 201과 새 메뉴 JSON을 반환하고 요청 값을 서비스에 그대로 전달한다")
     void create_returns_201_and_passes_request_values() throws Exception {
         MenuCreateRequestDTO expected = new MenuCreateRequestDTO(1, "House Blend", 6000, "blend");
         MenuResponseDTO created = new MenuResponseDTO(5, 1, "House Blend", 6000, "blend", true);

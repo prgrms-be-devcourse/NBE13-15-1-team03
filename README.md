@@ -6,13 +6,13 @@
 
 정예나
 
-    - API A01~A05, A15
+    - API A01~A05
     - 초기 데이터 구성
     - category 도메인
 
 변광준
 
-    - API A06~A10, A19~A21
+    - API A06~A10, A15, A19~A21
     - menu 도메인
 
 표한결
@@ -133,6 +133,12 @@ ALTER TABLE order_items
 - ID는 DB가 생성합니다. 빈 DB에서 처음 실행하면 카테고리 1·2, 메뉴 1~4입니다.
 
 **실행 방법**
+
+Redis 실행 (백엔드보다 먼저)
+```bash
+docker run -d --name redis -p 6379:6379 redis
+```
+- 이미 만들어 둔 컨테이너가 있으면 `docker start redis`
 백엔드: 활성 프로필 local로 CafeApplication 실행, 주소 http://127.0.0.1:8080
 web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.0.1:8000 접속, 연결 설정 → 실제 API 연결 → http://127.0.0.1:8080
 
@@ -301,7 +307,7 @@ web: web 폴더에서 java -m jdk.httpserver -b 127.0.0.1 -p 8000, http://127.0.
 
 | 담당 | 심화 | 코드 위치 | 검증 방법 |
 | --- | --- | --- | --- |
-| 정예나 | 업무 규칙 자동 테스트 | (`src/test/java/com/kdt/cafe/service/order/AdditionalTest.java`) | (./gradlew test --tests “com.kdt.cafe.service.order.AdditionalTest”) |
+| 정예나 | 업무 규칙 자동 테스트 | `src/test/java/com/kdt/cafe/service/order/AdditionalTest.java` | `./gradlew test --tests "com.kdt.cafe.service.order.AdditionalTest"` |
 | 변광준 | 별도 메뉴 페이징 API | `GET /api/v1/menus/page?page={page}&size={size}`<br>`controller/MenuController.java` (`page`: `page` 기본 0·0 이상, `size` 기본 10·1~50 검증)<br>`service/MenuService.java` (`findPage`: `PageRequest` + ID 오름차순으로 DB 조회)<br>`dto/menu/MenuPageResponseDTO.java` (`content`·`number`·`size`·`totalElements`·`totalPages`) | `./gradlew test --tests "com.kdt.cafe.service.MenuServiceTest"`<br>요청한 page·size와 ID 오름차순 정렬로 조회하는지, 조회 결과를 `content`·`number`·`size`·`totalElements`·`totalPages`로 변환하는지 확인 |
 | 허우솔 | 실제 DB 저장·롤백 테스트 | 테스트 `service/order/OrderPersistenceTest`, 테스트 DB 설정 `src/test/resources/application.yaml` (H2), 검증 대상 `OrderService.createOrder` (`@Transactional`) | `OrderPersistenceTest` (위 "[선택 심화] 실제 DB 저장·롤백 테스트" 참고) |
 | 허우솔 | RestClient 외부 조회·실패 처리 | `controller/ReferenceController`, `service/ReferenceService`, `config/RestClientConfig` | `ReferenceControllerTest` (위 "[선택 심화] RestClient 외부 조회·실패 처리" 참고) |
